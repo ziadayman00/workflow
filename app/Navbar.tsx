@@ -5,6 +5,7 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import Logo from "@/components/Logo";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -60,17 +61,8 @@ const Navbar = () => {
           style={{ scaleX }}
         />
         
-        {/* Logo */}
-        <Link href="/" className="cursor-pointer">
-          <Image
-            src="/workflow.svg"
-            alt="Workflow Logo"
-            width={100}
-            height={28}
-            className="h-5 md:h-6 w-auto"
-            priority
-          />
-        </Link>
+        {/* logo */}
+        <Logo/>
 
         {/* Desktop Navigation - Centered */}
         <ul className="hidden md:flex items-center space-x-1 text-[#fffbdf] absolute left-1/2 -translate-x-1/2">
@@ -96,7 +88,9 @@ const Navbar = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
+          <Link href='/sign-in'>
           Sign In
+          </Link>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </motion.button>
         

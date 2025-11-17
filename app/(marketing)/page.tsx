@@ -75,7 +75,7 @@ export default function Home() {
         >
           Organize your team.
           <br />
-          <span className="bg-gradient-to-r from-[#fffbdf] to-[#fff5b8] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#fffbdf] to-[#fff5b4] bg-clip-text text-transparent">
             Track your progress.
           </span>
           <br />
