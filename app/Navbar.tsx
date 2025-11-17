@@ -1,103 +1,202 @@
 "use client";
-import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useSpring } from "motion/react";
+import { Menu, X, ArrowRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  
+  // Track scroll progress
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
   
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Features", href: "features" },
-    { label: "Contact Us", href: "contact-us" },
+    { label: "Features", href: "/features" },
+    { label: "Contact Us", href: "/contact-us" },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
   
   return (
     <>
-      <nav 
-        className={`flex justify-between items-center px-6 md:px-20 py-4 fixed w-full z-50 transition-all duration-300 ${
+      <nav
+        className={`flex items-center px-6 md:px-20 py-5 fixed w-full z-50 transition-all duration-300 ${
           isScrolled 
-            ? "bg-[#222222]/80 backdrop-blur-md" 
+            ? "bg-[#222222]/90 backdrop-blur-md shadow-lg" 
             : "bg-transparent"
         }`}
       >
-        <h1 className="font-bold text-xl text-[#fffbdf]">WORKFLOW</h1>
-        <ul className="hidden md:flex items-center space-x-6 text-[#fffbdf]">
+        {/* Progress Bar */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-[1px] opacity-50 bg-[#fffbdf] origin-left"
+          style={{ scaleX }}
+        />
+        
+        {/* Logo */}
+        <Link href="/" className="cursor-pointer">
+          <Image
+            src="/workflow.svg"
+            alt="Workflow Logo"
+            width={100}
+            height={28}
+            className="h-5 md:h-6 w-auto"
+            priority
+          />
+        </Link>
+
+        {/* Desktop Navigation - Centered */}
+        <ul className="hidden md:flex items-center space-x-1 text-[#fffbdf] absolute left-1/2 -translate-x-1/2">
           {navLinks.map((link, index) => (
-            <li key={index} className="hover:text-white transition">
-              <Link href={link.href}>{link.label}</Link>
+            <li key={index} className="relative">
+              <Link
+                href={link.href}
+                className={`px-4 py-2 rounded-lg transition-colors hover:bg-[#fffbdf]/5 ${
+                  pathname === link.href
+                    ? "text-[#fffbdf] bg-[#fffbdf]/10" 
+                    : "text-[#fffbdf]/70 hover:text-[#fffbdf]"
+                }`}
+              >
+                {link.label}
+              </Link>
             </li>
           ))}
         </ul>
+
+        {/* Desktop Sign In Button */}
         <motion.button
-          className="hidden md:block px-4 py-1 bg-[#fffbdf] rounded-lg transition text-black cursor-pointer font-medium"
-          animate={{
-            scale: [1, 1.3, 1],
-            backgroundColor: ["#fffbdf", "#fff", "#fffbdf"],
-          }}
-          transition={{ repeat: 3, duration: 0.5, ease: "easeInOut" }}
+          className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-[#fffbdf] rounded-3xl cursor-pointer text-[#222222] font-thin hover:bg-[#fff5b8] transition-all group ml-auto"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           Sign In
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </motion.button>
         
         {/* Mobile: Sign In button + Menu icon */}
-        <div className="flex md:hidden items-center gap-4">
-          <button className="px-3 py-1 bg-[#fffbdf] rounded-lg text-black text-sm font-semibold">
+        <div className="flex md:hidden items-center gap-3 ml-auto">
+          <motion.button 
+            className="px-4 py-2 bg-[#fffbdf] rounded-lg text-[#222222] text-sm font-semibold"
+            whileTap={{ scale: 0.95 }}
+          >
             Sign In
-          </button>
-          <button
-            className="text-2xl text-[#fffbdf]"
+          </motion.button>
+          <motion.button
+            className="text-[#fffbdf] p-2 hover:bg-[#fffbdf]/10 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
+            whileTap={{ scale: 0.9 }}
           >
-            {isMobileMenuOpen ? <X /> : <Menu />}
-          </button>
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </motion.button>
         </div>
       </nav>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 bg-[#222222] z-40 md:hidden"
-          >
-            <div className="flex flex-col items-center justify-center h-full space-y-8">
-              {navLinks.map((link, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 + 0.2 }}
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 h-full w-[75%] max-w-sm bg-[#222222] border-l border-[#fffbdf]/10 z-50 md:hidden shadow-2xl"
+            >
+              {/* Close button */}
+              <div className="flex justify-end p-6">
+                <motion.button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-[#fffbdf] p-2 hover:bg-[#fffbdf]/10 rounded-lg transition-colors"
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <Link
-                    href={link.href}
-                    className="text-2xl text-[#fffbdf] hover:text-white transition"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <X size={24} />
+                </motion.button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="flex flex-col px-6 space-y-2 mt-8">
+                {navLinks.map((link, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 + 0.1 }}
                   >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+                    <Link
+                      href={link.href}
+                      className={`block text-2xl transition-colors py-4 px-4 rounded-lg ${
+                        pathname === link.href
+                          ? "text-[#fffbdf] bg-[#fffbdf]/10"
+                          : "text-[#fffbdf]/70 hover:text-[#fff5b8] hover:bg-[#fffbdf]/5"
+                      }`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Mobile Menu Footer */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="absolute bottom-8 left-6 right-6"
+              >
+                <div className="p-4 bg-[#fffbdf]/5 border border-[#fffbdf]/10 rounded-xl">
+                  <p className="text-[#fffbdf]/70 text-sm mb-3">
+                    Ready to get started?
+                  </p>
+                  <motion.button
+                    className="w-full bg-[#fffbdf] px-4 py-3 rounded-lg text-[#222222] font-semibold hover:bg-[#fff5b8] transition-colors"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Create Account
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
