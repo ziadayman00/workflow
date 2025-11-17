@@ -1,65 +1,183 @@
-import Image from "next/image";
+'use client'
+import React from "react";
+import { motion } from "motion/react";
+import { Zap, Target, Rocket, ArrowRight } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen flex flex-col justify-center items-center p-6 py-28 bg-gradient-to-br from-[#222222] via-[#2a2a2a] to-[#1a1a1a] relative overflow-hidden">
+      {/* Animated Background blurs */}
+      <motion.div 
+        className="absolute inset-0 opacity-20"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.2 }}
+        transition={{ duration: 1.5 }}
+      >
+        <motion.div 
+          className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
+          animate={{
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+        <motion.div 
+          className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
+          animate={{
+            x: [0, -30, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.3, 0.2],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </motion.div>
+
+      <div className="relative z-10 flex flex-col items-center w-full max-w-6xl">
+        {/* Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-sm font-medium mb-8"
+        >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fffbdf] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#fffbdf]"></span>
+          </span>
+          New: Real-time collaboration features now live
+        </motion.div>
+
+        {/* Main Heading */}
+        <motion.h1 
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-center font-bold max-w-5xl mb-6 leading-tight text-[#fffbdf]"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
+          Organize your team.
+          <br />
+          <span className="bg-gradient-to-r from-[#fffbdf] to-[#fff5b8] bg-clip-text text-transparent">
+            Track your progress.
+          </span>
+          <br />
+          Build better workflows.
+        </motion.h1>
+
+        {/* Subheading */}
+        <motion.p 
+          className="text-lg sm:text-xl md:text-2xl text-center text-[#fffbdf]/70 max-w-3xl mb-10 leading-relaxed px-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          Streamline collaboration and boost productivity with tools designed
+          for modern teams. Get started in minutes, scale to enterprise.
+        </motion.p>
+
+        {/* CTA Buttons */}
+        <motion.div 
+          className="flex gap-4 flex-wrap justify-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+        >
+          <motion.button 
+            className="bg-[#fffbdf] px-8 py-3.5 text-base font-medium text-[#222222] hover:bg-[#fff5b8] transition-all rounded-lg flex items-center gap-2 group"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Start Now
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </motion.button>
+          <motion.button 
+            className="bg-transparent border border-[#fffbdf]/30 px-8 py-3.5 text-base font-medium text-[#fffbdf] hover:border-[#fffbdf]/50 hover:bg-[#fffbdf]/5 transition-all rounded-lg"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
+            Learn More
+          </motion.button>
+        </motion.div>
+
+        {/* Feature Cards Grid */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.7 }}
+        >
+          {[
+            {
+              icon: Zap,
+              title: "Lightning Fast",
+              description: "Get up and running in minutes with our intuitive interface and smart onboarding."
+            },
+            {
+              icon: Target,
+              title: "Stay Focused",
+              description: "Track what matters and eliminate distractions from your workflow with precision tools."
+            },
+            {
+              icon: Rocket,
+              title: "Scale Easily",
+              description: "Grow from small teams to enterprise without missing a beat or compromising performance."
+            }
+          ].map((feature, index) => (
+            <motion.div
+              key={index}
+              className="p-6 sm:p-8 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl hover:border-[#fffbdf]/30 hover:bg-[#2a2a2a]/70 transition-all group cursor-pointer"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 + (index * 0.1) }}
+              whileHover={{ y: -5 }}
+            >
+              <div className="bg-[#fffbdf]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fffbdf]/20 transition-all">
+                <feature.icon className="w-7 h-7 text-[#fffbdf]" strokeWidth={1.5} />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-[#fffbdf] group-hover:text-[#fff5b8] transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-[#fffbdf]/60 leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Trust Indicators */}
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
+        >
+          <p className="text-sm text-[#fffbdf]/50 mb-4">TRUSTED BY TEAMS AT</p>
+          <div className="flex flex-wrap justify-center gap-8 items-center opacity-40">
+            <div className="text-[#fffbdf] font-semibold text-lg">Company A</div>
+            <div className="text-[#fffbdf] font-semibold text-lg">Company B</div>
+            <div className="text-[#fffbdf] font-semibold text-lg">Company C</div>
+            <div className="text-[#fffbdf] font-semibold text-lg">Company D</div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
