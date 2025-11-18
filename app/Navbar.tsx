@@ -8,7 +8,9 @@ import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/components/Logo";
 
-// Memoized Nav Link Component for better performance
+
+
+// Memoized Nav Link Component
 const NavLink = memo(({ link, pathname, onClick }: { 
   link: { label: string; href: string }; 
   pathname: string;
@@ -16,7 +18,7 @@ const NavLink = memo(({ link, pathname, onClick }: {
 }) => (
   <Link
     href={link.href}
-    className={`px-4 py-2 rounded-lg transition-colors hover:bg-[#fffbdf]/5 ${
+    className={`px-3 lg:px-4 py-2 rounded-lg transition-colors hover:bg-[#fffbdf]/5 text-sm lg:text-base ${
       pathname === link.href
         ? "text-[#fffbdf] bg-[#fffbdf]/10" 
         : "text-[#fffbdf]/70 hover:text-[#fffbdf]"
@@ -51,7 +53,7 @@ const Navbar = () => {
     { label: "Contact Us", href: "/contact-us" },
   ];
 
-  // Memoized scroll handler
+  // Scroll handler
   const handleScroll = useCallback(() => {
     setIsScrolled(window.scrollY > 50);
   }, []);
@@ -86,7 +88,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`flex items-center px-6 md:px-20 py-5 fixed w-full z-50 transition-all duration-300 ${
+        className={`flex items-center justify-between px-4 sm:px-6 md:px-12 lg:px-20 py-4 md:py-5 fixed w-full z-50 transition-all duration-300 ${
           isScrolled 
             ? "bg-[#222222]/90 backdrop-blur-md shadow-lg" 
             : "bg-transparent"
@@ -98,33 +100,36 @@ const Navbar = () => {
           style={{ scaleX }}
         />
         
-        {/* logo */}
-        <Logo/>
+        {/* Logo */}
+        <Logo />
 
         {/* Desktop Navigation - Centered */}
-        <ul className="hidden md:flex items-center space-x-1 text-[#fffbdf] absolute left-1/2 -translate-x-1/2">
-          {navLinks.map((link) => (
-            <li key={link.href} className="relative">
-              <NavLink link={link} pathname={pathname} />
-            </li>
-          ))}
-        </ul>
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
+          <ul className="flex items-center space-x-1 text-[#fffbdf]">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <NavLink link={link} pathname={pathname} />
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Desktop Right Section */}
-        <div className="hidden md:flex items-center gap-3 ml-auto">
+        <div className="hidden md:flex items-center gap-2 lg:gap-3">
           {status === "loading" ? (
             <div className="w-8 h-8 border-2 border-[#fffbdf]/30 border-t-[#fffbdf] rounded-full animate-spin" />
           ) : session ? (
             <>
-              {/* Dashboard Button */}
+              {/* Dashboard Button - Icon only on medium, text on large */}
               <Link href="/dashboard">
                 <motion.button
-                  className="flex items-center gap-2 px-4 py-2 text-[#fffbdf] hover:bg-[#fffbdf]/5 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-3 lg:px-4 py-2 text-[#fffbdf] hover:bg-[#fffbdf]/5 rounded-lg transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  aria-label="Dashboard"
                 >
                   <LayoutDashboard size={18} />
-                  Dashboard
+                  <span className="hidden lg:inline">Dashboard</span>
                 </motion.button>
               </Link>
 
@@ -132,9 +137,10 @@ const Navbar = () => {
               <div className="relative">
                 <motion.button
                   onClick={toggleUserMenu}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#fffbdf]/5 transition-colors border border-[#fffbdf]/10"
+                  className="flex items-center gap-2 px-2 lg:px-3 py-2 rounded-lg hover:bg-[#fffbdf]/5 transition-colors border border-[#fffbdf]/10"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  aria-label="User menu"
                 >
                   {session.user?.image ? (
                     <Image
@@ -149,7 +155,7 @@ const Navbar = () => {
                       <User size={14} className="text-[#fffbdf]" />
                     </div>
                   )}
-                  <span className="text-[#fffbdf] text-sm font-medium">{userName}</span>
+                  <span className="hidden lg:inline text-[#fffbdf] text-sm font-medium">{userName}</span>
                 </motion.button>
 
                 {/* Dropdown Menu */}
@@ -193,7 +199,7 @@ const Navbar = () => {
           ) : (
             <Link href="/signin">
               <motion.button
-                className="flex items-center gap-2 px-5 py-2.5 bg-[#fffbdf] rounded-3xl text-[#222222] font-thin hover:bg-[#fff5b8] transition-all group"
+                className="flex items-center gap-2 px-4 lg:px-5 py-2 lg:py-2.5 bg-[#fffbdf] rounded-3xl text-[#222222] font-thin hover:bg-[#fff5b8] transition-all group text-sm lg:text-base"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -205,22 +211,23 @@ const Navbar = () => {
         </div>
         
         {/* Mobile: Action buttons + Menu icon */}
-        <div className="flex md:hidden items-center gap-3 ml-auto">
+        <div className="flex md:hidden items-center gap-2 sm:gap-3">
           {status === "loading" ? (
             <div className="w-6 h-6 border-2 border-[#fffbdf]/30 border-t-[#fffbdf] rounded-full animate-spin" />
           ) : session ? (
             <Link href="/dashboard">
               <motion.button 
-                className="px-4 py-2 bg-[#fffbdf] rounded-lg text-[#222222] text-sm font-semibold"
+                className="p-2 bg-[#fffbdf] rounded-lg text-[#222222]"
                 whileTap={{ scale: 0.95 }}
+                aria-label="Dashboard"
               >
-                Dashboard
+                <LayoutDashboard size={18} />
               </motion.button>
             </Link>
           ) : (
             <Link href="/signin">
               <motion.button 
-                className="px-4 py-2 bg-[#fffbdf] rounded-lg text-[#222222] text-sm font-semibold"
+                className="px-3 sm:px-4 py-2 bg-[#fffbdf] rounded-lg text-[#222222] text-sm font-semibold"
                 whileTap={{ scale: 0.95 }}
               >
                 Sign In
@@ -258,14 +265,15 @@ const Navbar = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-[75%] max-w-sm bg-[#222222] border-l border-[#fffbdf]/10 z-50 md:hidden shadow-2xl"
+              className="fixed top-0 right-0 h-full w-[80%] max-w-sm bg-[#222222] border-l border-[#fffbdf]/10 z-50 md:hidden shadow-2xl"
             >
               {/* Close button */}
-              <div className="flex justify-end p-6">
+              <div className="flex justify-end p-5">
                 <motion.button
                   onClick={closeMobileMenu}
                   className="text-[#fffbdf] p-2 hover:bg-[#fffbdf]/10 rounded-lg transition-colors"
                   whileTap={{ scale: 0.9 }}
+                  aria-label="Close menu"
                 >
                   <X size={24} />
                 </motion.button>
@@ -277,9 +285,9 @@ const Navbar = () => {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="px-6 pb-6 border-b border-[#fffbdf]/10"
+                  className="px-5 pb-5 border-b border-[#fffbdf]/10"
                 >
-                  <div className="flex items-center gap-3 p-4 bg-[#fffbdf]/5 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-[#fffbdf]/5 rounded-lg">
                     {session.user?.image ? (
                       <Image
                         src={session.user.image}
@@ -294,10 +302,10 @@ const Navbar = () => {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-[#fffbdf] font-medium truncate">
+                      <p className="text-[#fffbdf] font-medium truncate text-sm">
                         {session.user?.name}
                       </p>
-                      <p className="text-[#fffbdf]/60 text-sm truncate">
+                      <p className="text-[#fffbdf]/60 text-xs truncate">
                         {session.user?.email}
                       </p>
                     </div>
@@ -306,7 +314,7 @@ const Navbar = () => {
               )}
 
               {/* Navigation Links */}
-              <div className="flex flex-col px-6 space-y-2 mt-8">
+              <div className="flex flex-col px-5 space-y-1 mt-6">
                 {navLinks.map((link, index) => (
                   <motion.div
                     key={link.href}
@@ -316,7 +324,7 @@ const Navbar = () => {
                   >
                     <Link
                       href={link.href}
-                      className={`block text-2xl transition-colors py-4 px-4 rounded-lg ${
+                      className={`block text-xl transition-colors py-3 px-4 rounded-lg ${
                         pathname === link.href
                           ? "text-[#fffbdf] bg-[#fffbdf]/10"
                           : "text-[#fffbdf]/70 hover:text-[#fff5b8] hover:bg-[#fffbdf]/5"
@@ -334,7 +342,7 @@ const Navbar = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="absolute bottom-8 left-6 right-6"
+                className="absolute bottom-6 left-5 right-5"
               >
                 {session ? (
                   <div className="space-y-2">
