@@ -1,70 +1,156 @@
 'use client'
-import React from "react";
+import React, { memo, useMemo } from "react";
 import { motion } from "motion/react";
 import { Zap, Target, Rocket, ArrowRight } from "lucide-react";
 
-export default function Home() {
+// Memoized Background Blur Component
+const BackgroundBlur = memo(() => (
+  <motion.div 
+    className="absolute inset-0 opacity-20 pointer-events-none"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 0.2 }}
+    transition={{ duration: 1.5 }}
+  >
+    <motion.div 
+      className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
+      animate={{
+        x: [0, 50, 0],
+        y: [0, 30, 0],
+      }}
+      transition={{
+        duration: 20,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <motion.div 
+      className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
+      animate={{
+        x: [0, -30, 0],
+        y: [0, 50, 0],
+      }}
+      transition={{
+        duration: 25,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <motion.div 
+      className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
+      animate={{
+        scale: [1, 1.2, 1],
+        opacity: [0.2, 0.3, 0.2],
+      }}
+      transition={{
+        duration: 15,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+  </motion.div>
+));
+
+BackgroundBlur.displayName = "BackgroundBlur";
+
+// Memoized Feature Card Component
+const FeatureCard = memo(({ icon: Icon, title, description, index }: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  index: number;
+}) => (
+  <motion.div
+    className="p-6 sm:p-8 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl hover:border-[#fffbdf]/30 hover:bg-[#2a2a2a]/70 transition-all group cursor-pointer"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay: 0.8 + (index * 0.1) }}
+    whileHover={{ y: -5 }}
+  >
+    <div className="bg-[#fffbdf]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fffbdf]/20 transition-all">
+      <Icon className="w-7 h-7 text-[#fffbdf]" strokeWidth={1.5} />
+    </div>
+    <h3 className="text-xl font-semibold mb-3 text-[#fffbdf] group-hover:text-[#fff5b8] transition-colors">
+      {title}
+    </h3>
+    <p className="text-[#fffbdf]/60 leading-relaxed">
+      {description}
+    </p>
+  </motion.div>
+));
+
+FeatureCard.displayName = "FeatureCard";
+
+// Memoized Badge Component
+const LiveBadge = memo(() => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    className="inline-flex items-center gap-2 px-4 py-2 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-sm font-medium mb-8"
+  >
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fffbdf] opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#fffbdf]"></span>
+    </span>
+    New: Real-time collaboration features now live
+  </motion.div>
+));
+
+LiveBadge.displayName = "LiveBadge";
+
+// Memoized Trust Indicators Component
+const TrustIndicators = memo(() => {
+  const companies = useMemo(() => ["Company A", "Company B", "Company C", "Company D"], []);
+  
+  return (
+    <motion.div
+      className="mt-16 text-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8, delay: 1.2 }}
+    >
+      <p className="text-sm text-[#fffbdf]/50 mb-4">TRUSTED BY TEAMS AT</p>
+      <div className="flex flex-wrap justify-center gap-8 items-center opacity-40">
+        {companies.map((company) => (
+          <div key={company} className="text-[#fffbdf] font-semibold text-lg">
+            {company}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+});
+
+TrustIndicators.displayName = "TrustIndicators";
+
+function Home() {
+  // Memoized features data
+  const features = useMemo(() => [
+    {
+      icon: Zap,
+      title: "Lightning Fast",
+      description: "Get up and running in minutes with our intuitive interface and smart onboarding."
+    },
+    {
+      icon: Target,
+      title: "Stay Focused",
+      description: "Track what matters and eliminate distractions from your workflow with precision tools."
+    },
+    {
+      icon: Rocket,
+      title: "Scale Easily",
+      description: "Grow from small teams to enterprise without missing a beat or compromising performance."
+    }
+  ], []);
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6 py-28 bg-gradient-to-br from-[#222222] via-[#2a2a2a] to-[#1a1a1a] relative overflow-hidden">
       {/* Animated Background blurs */}
-      <motion.div 
-        className="absolute inset-0 opacity-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.2 }}
-        transition={{ duration: 1.5 }}
-      >
-        <motion.div 
-          className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
-          animate={{
-            x: [0, -30, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
+      <BackgroundBlur />
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-6xl">
         {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-sm font-medium mb-8"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#fffbdf] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#fffbdf]"></span>
-          </span>
-          New: Real-time collaboration features now live
-        </motion.div>
+        <LiveBadge />
 
         {/* Main Heading */}
         <motion.h1 
@@ -124,60 +210,16 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.7 }}
         >
-          {[
-            {
-              icon: Zap,
-              title: "Lightning Fast",
-              description: "Get up and running in minutes with our intuitive interface and smart onboarding."
-            },
-            {
-              icon: Target,
-              title: "Stay Focused",
-              description: "Track what matters and eliminate distractions from your workflow with precision tools."
-            },
-            {
-              icon: Rocket,
-              title: "Scale Easily",
-              description: "Grow from small teams to enterprise without missing a beat or compromising performance."
-            }
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              className="p-6 sm:p-8 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl hover:border-[#fffbdf]/30 hover:bg-[#2a2a2a]/70 transition-all group cursor-pointer"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 + (index * 0.1) }}
-              whileHover={{ y: -5 }}
-            >
-              <div className="bg-[#fffbdf]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fffbdf]/20 transition-all">
-                <feature.icon className="w-7 h-7 text-[#fffbdf]" strokeWidth={1.5} />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-[#fffbdf] group-hover:text-[#fff5b8] transition-colors">
-                {feature.title}
-              </h3>
-              <p className="text-[#fffbdf]/60 leading-relaxed">
-                {feature.description}
-              </p>
-            </motion.div>
+          {features.map((feature, index) => (
+            <FeatureCard key={feature.title} {...feature} index={index} />
           ))}
         </motion.div>
 
         {/* Trust Indicators */}
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
-        >
-          <p className="text-sm text-[#fffbdf]/50 mb-4">TRUSTED BY TEAMS AT</p>
-          <div className="flex flex-wrap justify-center gap-8 items-center opacity-40">
-            <div className="text-[#fffbdf] font-semibold text-lg">Company A</div>
-            <div className="text-[#fffbdf] font-semibold text-lg">Company B</div>
-            <div className="text-[#fffbdf] font-semibold text-lg">Company C</div>
-            <div className="text-[#fffbdf] font-semibold text-lg">Company D</div>
-          </div>
-        </motion.div>
+        <TrustIndicators />
       </div>
     </div>
   );
 }
+
+export default memo(Home);

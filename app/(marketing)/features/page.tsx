@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef } from "react";
+import React, { useRef, memo, useMemo } from "react";
 import { motion, useScroll, useTransform, useSpring, MotionValue } from "motion/react";
 import {
   Kanban,
@@ -20,36 +20,141 @@ interface FeatureCardProps {
   reverse?: boolean;
 }
 
-function FeatureCard({ children, index, reverse = false }: FeatureCardProps) {
+// Memoized FeatureCard component
+const FeatureCard = memo(({ children, index, reverse = false }: FeatureCardProps) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   });
 
-  // Smooth spring animation
-  const smoothProgress = useSpring(scrollYProgress, {
+  // Smooth spring animation - memoized config
+  const springConfig = useMemo(() => ({
     stiffness: 100,
     damping: 30,
     restDelta: 0.001
-  });
+  }), []);
+
+  const smoothProgress = useSpring(scrollYProgress, springConfig);
+
+  // Memoized transform ranges
+  const transforms = useMemo(() => ({
+    yRange: [60, 0, -60] as [number, number, number],
+    opacityRange: [0, 1, 1, 1, 0] as [number, number, number, number, number],
+    scaleRange: [0.9, 1, 1, 1, 0.9] as [number, number, number, number, number],
+    textYRange: reverse ? [-30, 0, 30] as [number, number, number] : [30, 0, -30] as [number, number, number]
+  }), [reverse]);
 
   // Transform values for parallax and fade effects
-  const y = useTransform(smoothProgress, [0, 0.5, 1], [60, 0, -60]);
-  const opacity = useTransform(smoothProgress, [0, 0.3, 0.5, 0.7, 1], [0, 1, 1, 1, 0]);
-  const scale = useTransform(smoothProgress, [0, 0.3, 0.5, 0.7, 1], [0.9, 1, 1, 1, 0.9]);
-  
-  // Different animation for text based on position
-  const textY = useTransform(smoothProgress, [0, 0.5, 1], reverse ? [-30, 0, 30] : [30, 0, -30]);
+  const y = useTransform(smoothProgress, [0, 0.5, 1], transforms.yRange);
+  const opacity = useTransform(smoothProgress, [0, 0.3, 0.5, 0.7, 1], transforms.opacityRange);
+  const scale = useTransform(smoothProgress, [0, 0.3, 0.5, 0.7, 1], transforms.scaleRange);
+  const textY = useTransform(smoothProgress, [0, 0.5, 1], transforms.textYRange);
 
   return (
     <div ref={ref} className="grid md:grid-cols-2 gap-6 md:gap-8 items-center">
       {children({ y, opacity, scale, textY, smoothProgress })}
     </div>
   );
-}
+});
 
-export default function Features() {
+FeatureCard.displayName = "FeatureCard";
+
+// Memoized feature list item component
+const FeatureListItem = memo(({ text, index }: { text: string; index: number }) => (
+  <motion.li 
+    className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[#fffbdf]/80"
+    initial={{ opacity: 0, x: -20 }}
+    whileInView={{ opacity: 1, x: 0 }}
+    viewport={{ once: true, amount: 0.5 }}
+    transition={{ delay: index * 0.1, duration: 0.5 }}
+  >
+    <span className="text-[#fffbdf] mt-1">✓</span>
+    <span>{text}</span>
+  </motion.li>
+));
+
+FeatureListItem.displayName = "FeatureListItem";
+
+// Memoized badge component
+const FeatureBadge = memo(({ text }: { text: string }) => (
+  <motion.div 
+    className="inline-block px-3 py-1 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-xs sm:text-sm font-medium mb-3 sm:mb-4"
+    whileInView={{ scale: [0.8, 1.1, 1] }}
+    viewport={{ once: true, amount: 0.5 }}
+    transition={{ duration: 0.5 }}
+  >
+    {text}
+  </motion.div>
+));
+
+FeatureBadge.displayName = "FeatureBadge";
+
+// Memoized icon component
+const FeatureIcon = memo(({ Icon, ...motionProps }: { Icon: React.ElementType } & any) => (
+  <motion.div 
+    className="bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl p-6 sm:p-8 min-h-[250px] sm:min-h-[300px] flex items-center justify-center"
+    {...motionProps}
+  >
+    <Icon
+      className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 text-[#fffbdf]/50"
+      strokeWidth={1.5}
+    />
+  </motion.div>
+));
+
+FeatureIcon.displayName = "FeatureIcon";
+
+// Memoized background blur component
+const BackgroundBlur = memo(() => (
+  <motion.div 
+    className="absolute inset-0 opacity-20 pointer-events-none"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 0.2 }}
+    transition={{ duration: 1.5 }}
+  >
+    <motion.div 
+      className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
+      animate={{
+        x: [0, 50, 0],
+        y: [0, 30, 0],
+      }}
+      transition={{
+        duration: 20,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <motion.div 
+      className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
+      animate={{
+        x: [0, -30, 0],
+        y: [0, 50, 0],
+      }}
+      transition={{
+        duration: 25,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+    <motion.div 
+      className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
+      animate={{
+        scale: [1, 1.2, 1],
+        opacity: [0.2, 0.3, 0.2],
+      }}
+      transition={{
+        duration: 15,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+    />
+  </motion.div>
+));
+
+BackgroundBlur.displayName = "BackgroundBlur";
+
+function Features() {
   const headerRef = useRef(null);
   const { scrollYProgress } = useScroll({
     target: headerRef,
@@ -59,52 +164,62 @@ export default function Features() {
   const headerY = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const headerOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
+  // Memoized feature data
+  const featuresData = useMemo(() => [
+    {
+      badge: "Visual Organization",
+      title: "Drag-and-drop Kanban boards",
+      description: "Organize tasks visually with customizable columns. Drag tasks between To Do, In Progress, and Done with smooth animations that make managing work feel effortless.",
+      items: [
+        "Smooth drag-and-drop with real-time updates",
+        "Custom columns for your workflow",
+        "Priority badges and due date indicators"
+      ],
+      Icon: Kanban,
+      reverse: false
+    },
+    {
+      badge: "Stay in Sync",
+      title: "Real-time collaboration",
+      description: "See changes as they happen. When teammates move tasks, add comments, or update details, everyone sees it instantly—no refresh needed.",
+      items: [
+        "Live updates across all devices",
+        "Activity feed showing who did what",
+        "@mentions to notify team members"
+      ],
+      Icon: RefreshCw,
+      reverse: true
+    },
+    {
+      badge: "Team Control",
+      title: "Powerful team management",
+      description: "Invite team members, manage roles, and control access. Create multiple workspaces for different projects or departments.",
+      items: [
+        "Role-based permissions (Admin, Member, Viewer)",
+        "Easy email invitations",
+        "Multiple workspaces per account"
+      ],
+      Icon: Users,
+      reverse: false
+    },
+    {
+      badge: "Never Miss a Thing",
+      title: "Smart task tracking",
+      description: "Rich task details with descriptions, assignees, due dates, and priorities. Add comments to discuss details and keep all context in one place.",
+      items: [
+        "Assign tasks to team members",
+        "Set due dates and priority levels",
+        "Comment threads for discussion"
+      ],
+      Icon: CheckSquare,
+      reverse: true
+    }
+  ], []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#222222] via-[#2a2a2a] to-[#1a1a1a] relative overflow-hidden">
       {/* Animated Background blurs */}
-      <motion.div 
-        className="absolute inset-0 opacity-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.2 }}
-        transition={{ duration: 1.5 }}
-      >
-        <motion.div 
-          className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
-          animate={{
-            x: [0, -30, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
+      <BackgroundBlur />
 
       <div className="relative z-10 px-4 sm:px-6 py-20 md:py-28">
         {/* Header with parallax */}
@@ -134,226 +249,54 @@ export default function Features() {
 
         {/* Features Grid with scroll animations */}
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 md:space-y-32">
-          {/* Kanban Board */}
-          <FeatureCard index={0}>
-            {({ y, opacity, scale, textY }) => (
-              <>
-                <motion.div 
-                  className="order-2 md:order-1"
-                  style={{ y: textY, opacity }}
-                >
-                  <motion.div 
-                    className="inline-block px-3 py-1 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-xs sm:text-sm font-medium mb-3 sm:mb-4"
-                    whileInView={{ scale: [0.8, 1.1, 1] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    Visual Organization
-                  </motion.div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
-                    Drag-and-drop Kanban boards
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
-                    Organize tasks visually with customizable columns. Drag tasks
-                    between To Do, In Progress, and Done with smooth animations that
-                    make managing work feel effortless.
-                  </p>
-                  <ul className="space-y-2 sm:space-y-3">
-                    {[
-                      "Smooth drag-and-drop with real-time updates",
-                      "Custom columns for your workflow",
-                      "Priority badges and due date indicators"
-                    ].map((text, i) => (
-                      <motion.li 
-                        key={i}
-                        className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[#fffbdf]/80"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
+          {featuresData.map((feature, index) => (
+            <FeatureCard key={index} index={index} reverse={feature.reverse}>
+              {({ y, opacity, scale, textY }) => (
+                <>
+                  {feature.reverse ? (
+                    <>
+                      <FeatureIcon Icon={feature.Icon} style={{ y, scale, opacity }} />
+                      <motion.div style={{ y: textY, opacity }}>
+                        <FeatureBadge text={feature.badge} />
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
+                          {feature.title}
+                        </h2>
+                        <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
+                          {feature.description}
+                        </p>
+                        <ul className="space-y-2 sm:space-y-3">
+                          {feature.items.map((item, i) => (
+                            <FeatureListItem key={i} text={item} index={i} />
+                          ))}
+                        </ul>
+                      </motion.div>
+                    </>
+                  ) : (
+                    <>
+                      <motion.div 
+                        className="order-2 md:order-1"
+                        style={{ y: textY, opacity }}
                       >
-                        <span className="text-[#fffbdf] mt-1">✓</span>
-                        <span>{text}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </motion.div>
-                <motion.div 
-                  className="order-1 md:order-2 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl p-6 sm:p-8 min-h-[250px] sm:min-h-[300px] flex items-center justify-center"
-                  style={{ y, scale, opacity }}
-                >
-                  <Kanban
-                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 text-[#fffbdf]/50"
-                    strokeWidth={1.5}
-                  />
-                </motion.div>
-              </>
-            )}
-          </FeatureCard>
-
-          {/* Real-time Collaboration */}
-          <FeatureCard index={1} reverse>
-            {({ y, opacity, scale, textY }) => (
-              <>
-                <motion.div 
-                  className="bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl p-6 sm:p-8 min-h-[250px] sm:min-h-[300px] flex items-center justify-center"
-                  style={{ y, scale, opacity }}
-                >
-                  <RefreshCw
-                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 text-[#fffbdf]/50"
-                    strokeWidth={1.5}
-                  />
-                </motion.div>
-                <motion.div style={{ y: textY, opacity }}>
-                  <motion.div 
-                    className="inline-block px-3 py-1 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-xs sm:text-sm font-medium mb-3 sm:mb-4"
-                    whileInView={{ scale: [0.8, 1.1, 1] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    Stay in Sync
-                  </motion.div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
-                    Real-time collaboration
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
-                    See changes as they happen. When teammates move tasks, add
-                    comments, or update details, everyone sees it instantly—no
-                    refresh needed.
-                  </p>
-                  <ul className="space-y-2 sm:space-y-3">
-                    {[
-                      "Live updates across all devices",
-                      "Activity feed showing who did what",
-                      "@mentions to notify team members"
-                    ].map((text, i) => (
-                      <motion.li 
-                        key={i}
-                        className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[#fffbdf]/80"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
-                      >
-                        <span className="text-[#fffbdf] mt-1">✓</span>
-                        <span>{text}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </motion.div>
-              </>
-            )}
-          </FeatureCard>
-
-          {/* Team Management */}
-          <FeatureCard index={2}>
-            {({ y, opacity, scale, textY }) => (
-              <>
-                <motion.div 
-                  className="order-2 md:order-1"
-                  style={{ y: textY, opacity }}
-                >
-                  <motion.div 
-                    className="inline-block px-3 py-1 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-xs sm:text-sm font-medium mb-3 sm:mb-4"
-                    whileInView={{ scale: [0.8, 1.1, 1] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    Team Control
-                  </motion.div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
-                    Powerful team management
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
-                    Invite team members, manage roles, and control access. Create
-                    multiple workspaces for different projects or departments.
-                  </p>
-                  <ul className="space-y-2 sm:space-y-3">
-                    {[
-                      "Role-based permissions (Admin, Member, Viewer)",
-                      "Easy email invitations",
-                      "Multiple workspaces per account"
-                    ].map((text, i) => (
-                      <motion.li 
-                        key={i}
-                        className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[#fffbdf]/80"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
-                      >
-                        <span className="text-[#fffbdf] mt-1">✓</span>
-                        <span>{text}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </motion.div>
-                <motion.div 
-                  className="order-1 md:order-2 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl p-6 sm:p-8 min-h-[250px] sm:min-h-[300px] flex items-center justify-center"
-                  style={{ y, scale, opacity }}
-                >
-                  <Users
-                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 text-[#fffbdf]/50"
-                    strokeWidth={1.5}
-                  />
-                </motion.div>
-              </>
-            )}
-          </FeatureCard>
-
-          {/* Task Management */}
-          <FeatureCard index={3} reverse>
-            {({ y, opacity, scale, textY }) => (
-              <>
-                <motion.div 
-                  className="bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl p-6 sm:p-8 min-h-[250px] sm:min-h-[300px] flex items-center justify-center"
-                  style={{ y, scale, opacity }}
-                >
-                  <CheckSquare
-                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 text-[#fffbdf]/50"
-                    strokeWidth={1.5}
-                  />
-                </motion.div>
-                <motion.div style={{ y: textY, opacity }}>
-                  <motion.div 
-                    className="inline-block px-3 py-1 bg-[#fffbdf]/10 border border-[#fffbdf]/20 rounded-full text-[#fffbdf] text-xs sm:text-sm font-medium mb-3 sm:mb-4"
-                    whileInView={{ scale: [0.8, 1.1, 1] }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    Never Miss a Thing
-                  </motion.div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
-                    Smart task tracking
-                  </h2>
-                  <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
-                    Rich task details with descriptions, assignees, due dates, and
-                    priorities. Add comments to discuss details and keep all context
-                    in one place.
-                  </p>
-                  <ul className="space-y-2 sm:space-y-3">
-                    {[
-                      "Assign tasks to team members",
-                      "Set due dates and priority levels",
-                      "Comment threads for discussion"
-                    ].map((text, i) => (
-                      <motion.li 
-                        key={i}
-                        className="flex items-start gap-2 sm:gap-3 text-sm sm:text-base text-[#fffbdf]/80"
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1, duration: 0.5 }}
-                      >
-                        <span className="text-[#fffbdf] mt-1">✓</span>
-                        <span>{text}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-                </motion.div>
-              </>
-            )}
-          </FeatureCard>
+                        <FeatureBadge text={feature.badge} />
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-3 sm:mb-4">
+                          {feature.title}
+                        </h2>
+                        <p className="text-sm sm:text-base text-[#fffbdf]/70 mb-4 sm:mb-6 leading-relaxed">
+                          {feature.description}
+                        </p>
+                        <ul className="space-y-2 sm:space-y-3">
+                          {feature.items.map((item, i) => (
+                            <FeatureListItem key={i} text={item} index={i} />
+                          ))}
+                        </ul>
+                      </motion.div>
+                      <FeatureIcon Icon={feature.Icon} className="order-1 md:order-2" style={{ y, scale, opacity }} />
+                    </>
+                  )}
+                </>
+              )}
+            </FeatureCard>
+          ))}
         </div>
 
         {/* CTA Section with scroll animation */}
@@ -361,7 +304,7 @@ export default function Features() {
           className="max-w-4xl mx-auto text-center mt-16 sm:mt-20 md:mt-24 px-4"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: true, margin: "-100px", amount: 0.3 }}
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fffbdf] mb-4 sm:mb-6">
@@ -391,3 +334,5 @@ export default function Features() {
     </div>
   );
 }
+
+export default memo(Features);

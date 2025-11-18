@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CheckCircle, Clock, AlertCircle, Folder } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "../components/DashboardHeader";
 import StatsCard from "../components/StatsCard";
 import ProjectCard from "../components/ProjectCard";
@@ -12,14 +14,40 @@ import CreateProjectModal from "../components/CreateProjectModal";
  * Dashboard Page
  *
  * Main dashboard page showing:
- * - Welcome section
+ * - Welcome section with authenticated user
  * - Overview statistics
  * - Active projects
  * - Recent activity feed
  */
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signin");
+    }
+  }, [status, router]);
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#222222] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#fffbdf]/30 border-t-[#fffbdf] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-[#fffbdf]/60">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if not authenticated
+  if (!session) {
+    return null;
+  }
 
   // Mock data - Replace with real API calls later
   const stats = [
@@ -130,19 +158,20 @@ export default function DashboardPage() {
 
   // Handlers للمودال
   const handleOpenModal = () => {
-    setIsModalOpen(true); // يفتح المودال
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false); // يقفل المودال
+    setIsModalOpen(false);
   };
 
   const handleCreateProject = (projectData: {
     name: string;
     description?: string;
   }) => {
-    console.log("Create project:", projectData); // هنا ممكن تبعت البيانات للـ API
-    setIsModalOpen(false); // تقفل المودال بعد الإنشاء
+    console.log("Create project:", projectData);
+    // TODO: Add API call to create project with user session
+    setIsModalOpen(false);
   };
 
   // Handlers للمشاريع
@@ -155,6 +184,9 @@ export default function DashboardPage() {
     console.log("Project menu clicked:", id);
     // Open project menu options
   };
+
+  // Extract user name from session
+  const userName = session.user?.name?.split(" ")[0] || "User";
 
   return (
     <>
@@ -172,7 +204,8 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="px-6 py-8">
           <h2 className="font-light text-xl mb-2">
-            Welcome <span className="text-2xl font-bold uppercase">Ziad</span>
+            Welcome{" "}
+            <span className="text-2xl font-bold uppercase">{userName}</span>
           </h2>
           <p className="text-[#fffbdf]/60 text-sm">
             Here's what's happening with your projects today
