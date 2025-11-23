@@ -3,51 +3,34 @@ import React, { memo, useMemo } from "react";
 import { motion } from "motion/react";
 import { Zap, Target, Rocket, ArrowRight } from "lucide-react";
 
-// Memoized Background Blur Component
+// Memoized Background Blur Component - Reduced animations for performance
 const BackgroundBlur = memo(() => (
-  <motion.div 
-    className="absolute inset-0 opacity-20 pointer-events-none"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 0.2 }}
-    transition={{ duration: 1.5 }}
-  >
+  <div className="absolute inset-0 opacity-15 pointer-events-none">
     <motion.div 
-      className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[120px]"
+      className="absolute top-20 left-10 w-72 h-72 bg-[#fffbdf] rounded-full filter blur-[100px]"
       animate={{
-        x: [0, 50, 0],
-        y: [0, 30, 0],
-      }}
-      transition={{
-        duration: 20,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    />
-    <motion.div 
-      className="absolute bottom-20 right-10 w-96 h-96 bg-[#fffbdf] rounded-full filter blur-[150px]"
-      animate={{
-        x: [0, -30, 0],
-        y: [0, 50, 0],
+        x: [0, 30, 0],
+        y: [0, 20, 0],
       }}
       transition={{
         duration: 25,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: "linear"
       }}
     />
     <motion.div 
-      className="absolute top-1/2 left-1/2 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[140px]"
+      className="absolute bottom-20 right-10 w-80 h-80 bg-[#fffbdf] rounded-full filter blur-[100px]"
       animate={{
-        scale: [1, 1.2, 1],
-        opacity: [0.2, 0.3, 0.2],
+        x: [0, -20, 0],
+        y: [0, 30, 0],
       }}
       transition={{
-        duration: 15,
+        duration: 30,
         repeat: Infinity,
-        ease: "easeInOut"
+        ease: "linear"
       }}
     />
-  </motion.div>
+  </div>
 ));
 
 BackgroundBlur.displayName = "BackgroundBlur";
@@ -63,7 +46,7 @@ const FeatureCard = memo(({ icon: Icon, title, description, index }: {
     className="p-6 sm:p-8 bg-[#2a2a2a]/50 backdrop-blur-sm border border-[#fffbdf]/10 rounded-2xl hover:border-[#fffbdf]/30 hover:bg-[#2a2a2a]/70 transition-all group cursor-pointer"
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay: 0.8 + (index * 0.1) }}
+    transition={{ duration: 0.6, delay: 1.8 + (index * 0.1) }}
     whileHover={{ y: -5 }}
   >
     <div className="bg-[#fffbdf]/10 w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fffbdf]/20 transition-all">
@@ -110,7 +93,7 @@ const TrustIndicators = memo(() => {
       className="mt-16 text-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, delay: 1.2 }}
+      transition={{ duration: 0.8, delay: 2.2 }}
     >
       <p className="text-sm text-[#fffbdf]/50 mb-4">TRUSTED BY TEAMS AT</p>
       <div className="flex flex-wrap justify-center gap-8 items-center opacity-40">
@@ -148,7 +131,7 @@ function Home() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6 py-28 bg-gradient-to-br from-[#222222] via-[#2a2a2a] to-[#1a1a1a] relative overflow-hidden">
-      {/* Animated Background blurs */}
+      {/* Animated Background blurs - Optimized */}
       <BackgroundBlur />
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-6xl">
@@ -206,12 +189,104 @@ function Home() {
           </motion.button>
         </motion.div>
 
+        {/* Product Screenshots - Responsive Layout */}
+        <motion.div 
+          className="w-full px-4 mb-20 mt-8"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.7 }}
+        >
+          {/* Desktop 3D Layout */}
+          <div className="hidden md:block relative max-w-6xl mx-auto h-[500px]" style={{ perspective: '2000px' }}>
+            {/* Projects View (Left/Back) */}
+            <motion.div
+              className="absolute left-0 top-8 w-[52%] z-10 will-change-transform"
+              initial={{ opacity: 0, x: -100, rotateY: 20 }}
+              animate={{ opacity: 1, x: 0, rotateY: 12 }}
+              transition={{ duration: 1.2, delay: 0.9, ease: "easeOut" }}
+              whileHover={{ 
+                rotateY: 2, 
+                x: -30, 
+                scale: 1.02,
+                transition: { duration: 0.3 } 
+              }}
+            >
+              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] p-2 rounded-2xl border border-[#fffbdf]/30 shadow-[0_20px_60px_rgba(255,251,223,0.1)] overflow-hidden">
+                <img 
+                  src="hero1.png" 
+                  alt="Project Management Dashboard"
+                  className="w-full h-auto rounded-xl"
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
+
+            {/* Tasks View (Right/Front) */}
+            <motion.div
+              className="absolute right-0 top-0 w-[52%] z-20 will-change-transform"
+              initial={{ opacity: 0, x: 100, rotateY: -20 }}
+              animate={{ opacity: 1, x: 0, rotateY: -12 }}
+              transition={{ duration: 1.2, delay: 1.1, ease: "easeOut" }}
+              whileHover={{ 
+                rotateY: -2, 
+                x: 30, 
+                scale: 1.02,
+                transition: { duration: 0.3 } 
+              }}
+            >
+              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] p-2 rounded-2xl border border-[#fffbdf]/30 shadow-[0_25px_70px_rgba(255,251,223,0.15)] overflow-hidden">
+                <img 
+                  src="hero2.png" 
+                  alt="Task Management Board"
+                  className="w-full h-auto rounded-xl"
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Mobile Stack Layout */}
+          <div className="md:hidden space-y-6 max-w-lg mx-auto">
+            {/* Tasks View */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.9 }}
+            >
+              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] p-2 rounded-2xl border border-[#fffbdf]/30 shadow-[0_25px_70px_rgba(255,251,223,0.15)] overflow-hidden">
+                <img 
+                  src="hero2.png" 
+                  alt="Task Management Board"
+                  className="w-full h-auto rounded-xl"
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
+
+            {/* Projects View */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 1.1 }}
+            >
+              <div className="bg-gradient-to-br from-[#2a2a2a] to-[#1f1f1f] p-2 rounded-2xl border border-[#fffbdf]/30 shadow-[0_20px_60px_rgba(255,251,223,0.1)] overflow-hidden">
+                <img 
+                  src="hero1.png" 
+                  alt="Project Management Dashboard"
+                  className="w-full h-auto rounded-xl"
+                  loading="eager"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+
         {/* Feature Cards Grid */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
+          transition={{ duration: 0.8, delay: 1.6 }}
         >
           {features.map((feature, index) => (
             <FeatureCard key={feature.title} {...feature} index={index} />
