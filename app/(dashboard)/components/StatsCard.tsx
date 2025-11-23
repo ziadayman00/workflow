@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Folder } from 'lucide-react';
 
 /**
  * StatsCard Component
@@ -9,13 +9,22 @@ import { LucideIcon } from 'lucide-react';
  */
 
 interface StatsCardProps {
-  icon: LucideIcon;
+  icon: string;
   label: string;
   value: string | number;
   color: string;
 }
 
-export default function StatsCard({ icon: Icon, label, value, color }: StatsCardProps) {
+const iconMap = {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Folder,
+};
+
+export default function StatsCard({ icon: iconName, label, value, color }: StatsCardProps) {
+  const Icon = iconMap[iconName as keyof typeof iconMap] || AlertCircle;
+  
   return (
     <div className="bg-[#2a2a2a] border border-[#fffbdf]/10 rounded-xl p-6 hover:border-[#fffbdf]/20 transition-colors">
       {/* Icon and Value Row */}

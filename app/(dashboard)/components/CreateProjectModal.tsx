@@ -107,11 +107,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ isOpen, onClose
   return (
     <>
       <div 
-        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm"
         onClick={handleClose}
       />
       
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
+      <div className="fixed inset-0 z-100 flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
         <div 
           className="bg-[#222222] border border-[#fffbdf]/10 rounded-2xl shadow-2xl w-full max-w-2xl pointer-events-auto my-8 max-h-[calc(100vh-4rem)] flex flex-col"
           onClick={(e) => e.stopPropagation()}

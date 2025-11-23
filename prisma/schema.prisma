@@ -1,12 +1,13 @@
 generator client {
-  provider = "prisma-client-js"  // Change from "prisma-client" to "prisma-client-js"
-  // Remove the custom output path
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ==================== Authentication Models ====================
 
 model Account {
   id                String  @id @default(cuid())
@@ -44,8 +45,19 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
   accounts      Account[]
   sessions      Session[]
+  teamMemberships TeamMember[]
+  createdTeams  Team[]       @relation("TeamCreator")
+  createdProjects Project[]  @relation("ProjectCreator")
+  assignedTasks Task[]       @relation("TaskAssignee")
+  createdTasks  Task[]       @relation("TaskCreator")
+  comments      Comment[]
+  activities    Activity[]
 }
 
 model VerificationToken {
@@ -54,4 +66,194 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// ==================== Team Models ====================
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  creator   User         @relation("TeamCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  members   TeamMember[]
+  projects  Project[]
+  activities Activity[]
+
+  @@index([createdBy])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  // Relations
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+enum TeamRole {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ==================== Project Models ====================
+
+model Project {
+  id          String        @id @default(uuid())
+  teamId      String
+  name        String
+  description String?       @db.Text
+  status      ProjectStatus @default(ACTIVE)
+  color       String        @default("#4ade80")
+  createdBy   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  team    Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  creator User      @relation("ProjectCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  tasks   Task[]
+  sections Section[]
+  activities Activity[]
+
+  @@index([teamId])
+  @@index([createdBy])
+  @@index([status])
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  ON_HOLD
+}
+
+// ==================== Section Models ====================
+
+model Section {
+  id        String     @id @default(uuid())
+  projectId String
+  name      String
+  status    TaskStatus // Which column this section belongs to (TODO, IN_PROGRESS, DONE)
+  position  Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId])
+  @@index([status])
+  @@index([position])
+}
+
+// ==================== Task Models ====================
+
+model Task {
+  id          String       @id @default(uuid())
+  projectId   String
+  sectionId   String?      // Optional: task can belong to a section
+  title       String
+  description String?      @db.Text
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  assignedTo  String?
+  createdBy   String
+  dueDate     DateTime?
+  position    Int          @default(0) // For ordering within columns
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  section  Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  assignee User?    @relation("TaskAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  creator  User     @relation("TaskCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  comments Comment[]
+
+  @@index([projectId])
+  @@index([sectionId])
+  @@index([assignedTo])
+  @@index([createdBy])
+  @@index([status])
+  @@index([dueDate])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ==================== Comment Models ====================
+
+model Comment {
+  id        String   @id @default(uuid())
+  taskId    String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ==================== Activity Models ====================
+
+model Activity {
+  id         String       @id @default(uuid())
+  userId     String
+  teamId     String
+  actionType ActivityType
+  actionData Json? // Flexible field to store activity-specific data
+  projectId  String?
+  createdAt  DateTime     @default(now())
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team    Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([projectId])
+  @@index([createdAt])
+}
+
+enum ActivityType {
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_COMPLETED
+  TASK_ASSIGNED
+  TASK_COMMENTED
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  MEMBER_JOINED
+  MEMBER_LEFT
 }
