@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import Link from 'next/link';
 import { Users, MoreVertical } from 'lucide-react';
 
 /**
@@ -11,12 +14,11 @@ import { Users, MoreVertical } from 'lucide-react';
 interface ProjectCardProps {
   id?: string;
   name: string;
-  description: string;
+  description?: string | null;
   tasksTotal: number;
   tasksCompleted: number;
   color: string;
   teamMembers: string[];
-  onClick?: (id?: string) => void;
   onMenuClick?: (id?: string) => void;
 }
 
@@ -28,15 +30,14 @@ export default function ProjectCard({
   tasksCompleted, 
   color, 
   teamMembers,
-  onClick,
   onMenuClick
 }: ProjectCardProps) {
   const progress = tasksTotal > 0 ? (tasksCompleted / tasksTotal) * 100 : 0;
   
   return (
-    <div 
-      className="bg-[#2a2a2a] border border-[#fffbdf]/10 rounded-xl p-6 hover:border-[#fffbdf]/30 transition-all cursor-pointer"
-      onClick={() => onClick?.(id)}
+    <Link 
+      href={`/dashboard/project/${id}`}
+      className="block bg-[#2a2a2a] border border-[#fffbdf]/10 rounded-xl p-6 hover:border-[#fffbdf]/30 transition-all cursor-pointer"
     >
       {/* Project Header */}
       <div className="flex items-start justify-between mb-4">
@@ -50,6 +51,7 @@ export default function ProjectCard({
         <button 
           className="text-[#fffbdf]/40 hover:text-[#fffbdf] transition-colors"
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onMenuClick?.(id);
           }}
@@ -60,7 +62,7 @@ export default function ProjectCard({
 
       {/* Project Description */}
       <p className="text-[#fffbdf]/60 text-sm mb-4 line-clamp-2">
-        {description}
+        {description || 'No description'}
       </p>
 
       {/* Progress Bar */}
@@ -95,6 +97,6 @@ export default function ProjectCard({
           ))}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
