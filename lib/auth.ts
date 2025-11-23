@@ -18,19 +18,23 @@ export const authOptions: NextAuthOptions = {
       allowDangerousEmailAccountLinking: true,
     }),
   ],
-  // REMOVE THIS - PrismaAdapter needs database sessions
-  // session: {
-  //   strategy: "jwt",
-  // },
+  session: {
+    strategy: "jwt",
+  },
   pages: {
     signIn: '/signin',
     error: '/signin',
   },
   callbacks: {
-    async session({ session, user }) {
-      // With database sessions, user is available directly
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = token.id as string;
       }
       return session;
     },
