@@ -136,8 +136,8 @@ export default async function DashboardContent() {
                     .toLowerCase()
                     .replace("_", " ")}
                   target={
-                    activity.actionData?.projectName ||
-                    activity.actionData?.taskTitle ||
+                    (activity.actionData as any)?.projectName ||
+                    (activity.actionData as any)?.taskTitle ||
                     "something"
                   }
                   time={new Date(activity.createdAt).toLocaleDateString()}
