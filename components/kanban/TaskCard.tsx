@@ -16,6 +16,7 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
     LOW: { bg: "bg-blue-500/10", text: "text-blue-500", border: "border-blue-500/20" },
     MEDIUM: { bg: "bg-yellow-500/10", text: "text-yellow-500", border: "border-yellow-500/20" },
     HIGH: { bg: "bg-red-500/10", text: "text-red-500", border: "border-red-500/20" },
+    URGENT: { bg: "bg-orange-600/10", text: "text-orange-600", border: "border-orange-600/20" },
   };
 
   const priority = task.priority as TaskPriority;
