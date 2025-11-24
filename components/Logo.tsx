@@ -4,16 +4,18 @@ import React from "react";
 
 const Logo = () => {
   return (
-    <Link href="/" className="cursor-pointer flex-shrink-0">
-    <Image
-      src="/workflow.svg"
-      alt="Workflow Logo"
-      width={100}
-      height={28}
-      className="h-5 md:h-6 w-auto"
-      priority
-    />
-  </Link>
+    <Link href="/" className="cursor-pointer flex-shrink-0 block">
+      <div className="relative h-8 w-28 md:h-9 md:w-32">
+        <Image
+          src="/workflow.svg"
+          alt="Workflow Logo"
+          fill
+          className="object-contain object-left"
+          priority
+          sizes="(max-width: 768px) 112px, 128px"
+        />
+      </div>
+    </Link>
   );
 };
 
