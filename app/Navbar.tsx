@@ -345,10 +345,10 @@ const Navbar = () => {
                 className="absolute bottom-6 left-5 right-5"
               >
                 {session ? (
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <Link href="/dashboard" onClick={closeMobileMenu}>
                       <motion.button
-                        className="w-full bg-[#fffbdf] px-4 py-3 rounded-lg text-[#222222] font-semibold hover:bg-[#fff5b8] transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-[#fffbdf] px-4 py-3 my-3 rounded-lg text-[#222222] font-semibold hover:bg-[#fff5b8] transition-colors flex items-center justify-center gap-2"
                         whileTap={{ scale: 0.98 }}
                       >
                         <LayoutDashboard size={18} />

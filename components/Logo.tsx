@@ -4,15 +4,15 @@ import React from "react";
 
 const Logo = () => {
   return (
-    <Link href="/" className="cursor-pointer flex-shrink-0 block">
-      <div className="relative h-8 w-28 md:h-9 md:w-32">
+    <Link href="/" className="cursor-pointer flex-shrink-0 flex items-center">
+      <div className="relative h-10 w-32 md:w-40">
         <Image
           src="/workflow.svg"
           alt="Workflow Logo"
           fill
-          className="object-contain object-left"
+          className="object-contain object-center"
           priority
-          sizes="(max-width: 768px) 112px, 128px"
+          sizes="(max-width: 768px) 128px, 160px"
         />
       </div>
     </Link>
