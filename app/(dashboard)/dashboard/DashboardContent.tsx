@@ -1,13 +1,16 @@
 import { getProjects } from "@/app/actions/project";
 import { getUserActivities } from "@/app/actions/activity";
+import { getUserInvitations } from "@/app/actions/invitation";
 import StatsCard from "../components/StatsCard";
 import ProjectCard from "../components/ProjectCard";
 import ActivityItem from "@/components/ActivityItem";
+import InvitationsList from "@/components/invitations/InvitationsList";
 
 export default async function DashboardContent() {
-  const [projectsResult, activitiesResult] = await Promise.all([
+  const [projectsResult, activitiesResult, invitationsResult] = await Promise.all([
     getProjects(),
     getUserActivities(),
+    getUserInvitations(),
   ]);
 
   const projects =
@@ -17,6 +20,10 @@ export default async function DashboardContent() {
   const activities =
     activitiesResult.success && activitiesResult.activities
       ? activitiesResult.activities
+      : [];
+  const invitations =
+    invitationsResult.success && invitationsResult.invitations
+      ? invitationsResult.invitations
       : [];
 
   // Calculate stats
@@ -78,6 +85,13 @@ export default async function DashboardContent() {
           ))}
         </div>
       </div>
+
+      {/* Invitations */}
+      {invitations.length > 0 && (
+        <div className="px-6 mb-8">
+          <InvitationsList />
+        </div>
+      )}
 
       {/* Projects and Activities */}
       <div className="px-6 pb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
