@@ -55,14 +55,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="min-h-screen bg-[#222222] text-[#fffbdf]">
-      <div className="px-6 py-8">
+      <div className="px-4 py-6 sm:px-6 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{project.name}</h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{project.name}</h1>
             <p className="text-[#fffbdf]/60">{project.description}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 self-end sm:self-auto">
             <div className="flex -space-x-2">
               {project.team.members.map((member: any) => (
                 <div
@@ -86,9 +86,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column: Kanban Board (Takes 2/3 width) */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="xl:col-span-2 space-y-6 lg:space-y-8">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <ListTodo className="w-5 h-5" />
@@ -97,7 +97,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </div>
             
             {/* Kanban Board */}
-            <div className="h-[600px]">
+            <div className="h-[500px] sm:h-[600px] lg:h-[700px]">
               <KanbanBoard 
                 projectId={project.id} 
                 tasks={project.tasks}
@@ -113,14 +113,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           {/* Right Column: Activity & Team (Takes 1/3 width) */}
-          <div className="space-y-8">
+          <div className="space-y-6 lg:space-y-8">
             {/* Activity Feed */}
-            <div className="rounded-xl border border-[#fffbdf]/10 bg-[#2a2a2a] p-6">
-              <h2 className="mb-6 text-lg font-semibold flex items-center gap-2">
+            <div className="rounded-xl border border-[#fffbdf]/10 bg-[#2a2a2a] p-4 sm:p-6">
+              <h2 className="mb-4 sm:mb-6 text-lg font-semibold flex items-center gap-2">
                 <Activity className="w-5 h-5" />
                 Recent Activity
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[300px] overflow-y-auto scrollbar-hide">
                 {activities.length > 0 ? (
                   activities.map((activity: any, index: number) => (
                     <ActivityItem 

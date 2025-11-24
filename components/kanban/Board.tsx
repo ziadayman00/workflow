@@ -126,7 +126,7 @@ export default function KanbanBoard({ projectId, tasks, sections = [], teamMembe
         />
       )}
       
-      <div className="flex h-full gap-6 overflow-x-auto pb-4">
+      <div className="flex h-full gap-6 overflow-x-auto scrollbar-hide pb-4">
         <Column 
           title="To Do" 
           status="TODO" 

@@ -109,7 +109,7 @@ export default function Column({
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto scrollbar-hide">
         {tasks.map((task) => (
           <TaskCard 
             key={task.id} 

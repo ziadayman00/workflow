@@ -1,7 +1,7 @@
 "use client";
 
 import { TaskPriority } from "@prisma/client";
-import { Calendar, Flag, User, GripVertical } from "lucide-react";
+import { Calendar, Flag, User, GripVertical, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 
 interface TaskCardProps {
@@ -21,6 +21,7 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
 
   const priority = task.priority as TaskPriority;
   const colors = priorityColors[priority] || priorityColors.MEDIUM;
+  const commentCount = task.comments?.length || 0;
 
   const handleClick = (e: React.MouseEvent) => {
     // Don't trigger click when dragging
@@ -83,9 +84,18 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
                 <span className="truncate max-w-[100px]">{task.assignee.name}</span>
               </div>
             )}
+
+            {/* Comment Count */}
+            {commentCount > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#fffbdf]/10 text-[#fffbdf] border border-[#fffbdf]/20">
+                <MessageCircle className="h-3 w-3" />
+                <span className="font-medium">{commentCount}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
+
