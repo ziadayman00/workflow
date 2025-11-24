@@ -118,7 +118,7 @@ model Invitation {
   teamId    String
   projectId String           // Project-specific invitation
   email     String
-  role      TeamRole         @default(MEMBER)
+  role      ProjectRole      @default(MEMBER)
   status    InvitationStatus @default(PENDING)
   invitedBy String
   createdAt DateTime         @default(now())
