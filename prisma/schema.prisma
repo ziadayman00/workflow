@@ -52,6 +52,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   teamMemberships TeamMember[]
+  projectMemberships ProjectMember[]
   createdTeams  Team[]       @relation("TeamCreator")
   createdProjects Project[]  @relation("ProjectCreator")
   assignedTasks Task[]       @relation("TaskAssignee")
@@ -158,6 +159,7 @@ model Project {
   // Relations
   team    Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
   creator User      @relation("ProjectCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  members ProjectMember[]
   tasks   Task[]
   sections Section[]
   activities Activity[]
@@ -173,6 +175,29 @@ enum ProjectStatus {
   ARCHIVED
   COMPLETED
   ON_HOLD
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid())
+  projectId String
+  userId    String
+  role      ProjectRole @default(MEMBER)
+  joinedAt  DateTime    @default(now())
+  
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+}
+
+enum ProjectRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
 }
 
 // ==================== Section Models ====================

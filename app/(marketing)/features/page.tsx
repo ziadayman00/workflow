@@ -179,7 +179,7 @@ function Features() {
           style={{ y: headerY, opacity: headerOpacity }}
         >
           <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#fffbdf] mb-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -218,7 +218,7 @@ function Features() {
                         transition={{ duration: 0.5 }}
                       >
                         <FeatureBadge text={feature.badge} />
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#fffbdf] mb-4 leading-tight">
                           {feature.title}
                         </h2>
                         <p className="text-base sm:text-lg text-[#fffbdf]/60 mb-8 leading-relaxed">
@@ -242,7 +242,7 @@ function Features() {
                         transition={{ duration: 0.5 }}
                       >
                         <FeatureBadge text={feature.badge} />
-                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#fffbdf] mb-4 leading-tight">
                           {feature.title}
                         </h2>
                         <p className="text-base sm:text-lg text-[#fffbdf]/60 mb-8 leading-relaxed">
@@ -276,7 +276,7 @@ function Features() {
           viewport={{ once: true, margin: "-50px", amount: 0.3 }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#fffbdf] mb-6">
             Ready to transform your workflow?
           </h2>
           <p className="text-lg sm:text-xl text-[#fffbdf]/60 mb-10 max-w-2xl mx-auto leading-relaxed">

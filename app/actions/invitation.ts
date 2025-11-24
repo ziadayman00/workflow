@@ -3,7 +3,7 @@
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { TeamRole, InvitationStatus } from "@prisma/client";
+import { TeamRole, InvitationStatus, ProjectRole } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 
 /**
@@ -56,38 +56,62 @@ async function checkTeamAccess(teamId: string, userId: string, requiredRole?: Te
   return membership;
 }
 
+async function checkProjectAccess(projectId: string, userId: string) {
+  // Check project membership first
+  const projectMember = await prisma.projectMember.findUnique({
+    where: {
+      projectId_userId: {
+        projectId,
+        userId,
+      },
+    },
+  });
+
+  if (projectMember && (projectMember.role === 'OWNER' || projectMember.role === 'ADMIN')) {
+    return true;
+  }
+
+  // Fallback: Check team admin access
+  const project = await prisma.project.findUnique({
+    where: { id: projectId },
+    include: {
+      team: {
+        include: {
+          members: {
+            where: { userId },
+          },
+        },
+      },
+    },
+  });
+
+  if (project?.team.members[0]?.role === 'ADMIN') {
+    return true;
+  }
+
+  throw new Error("Admin access required");
+}
+
 // ==================== Invitation Actions ====================
 
 export async function createInvitation(data: {
   projectId: string;
   email: string;
-  role?: TeamRole;
+  role?: ProjectRole;
 }) {
   try {
     const user = await getCurrentUser();
     
-    // Get project to verify access and get teamId
+    // Check if user has project admin/owner access
+    await checkProjectAccess(data.projectId, user.id);
+    
+    // Get project to get teamId
     const project = await prisma.project.findUnique({
       where: { id: data.projectId },
-      include: {
-        team: {
-          include: {
-            members: {
-              where: { userId: user.id },
-            },
-          },
-        },
-      },
     });
     
     if (!project) {
       return { success: false, error: "Project not found" };
-    }
-    
-    // Check if user is team admin
-    const membership = project.team.members[0];
-    if (!membership || membership.role !== TeamRole.ADMIN) {
-      return { success: false, error: "Admin access required" };
     }
     
     // Check if email exists in database
@@ -99,18 +123,18 @@ export async function createInvitation(data: {
       return { success: false, error: "User not found. They need to sign up first." };
     }
     
-    // Check if already a team member
-    const existingMember = await prisma.teamMember.findUnique({
+    // Check if already a project member
+    const existingMember = await prisma.projectMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: project.teamId,
+        projectId_userId: {
+          projectId: data.projectId,
           userId: invitedUser.id,
         },
       },
     });
     
     if (existingMember) {
-      return { success: false, error: "User is already a team member" };
+      return { success: false, error: "User is already a project member" };
     }
     
     // Check if invitation already exists for this project
@@ -137,7 +161,7 @@ export async function createInvitation(data: {
       },
       update: {
         status: InvitationStatus.PENDING,
-        role: data.role || TeamRole.MEMBER,
+        role: data.role || "MEMBER",
         invitedBy: user.id,
         createdAt: new Date(),
       },
@@ -145,7 +169,7 @@ export async function createInvitation(data: {
         projectId: data.projectId,
         teamId: project.teamId,
         email: data.email,
-        role: data.role || TeamRole.MEMBER,
+        role: data.role || "MEMBER",
         invitedBy: user.id,
       },
       include: {
@@ -219,6 +243,7 @@ export async function acceptInvitation(invitationId: string) {
       where: { id: invitationId },
       include: {
         team: true,
+        project: true,
       },
     });
     
@@ -234,11 +259,11 @@ export async function acceptInvitation(invitationId: string) {
       return { success: false, error: "Invitation is no longer valid" };
     }
     
-    // Check if already a member (race condition protection)
-    const existingMember = await prisma.teamMember.findUnique({
+    // Check if already a project member (race condition protection)
+    const existingMember = await prisma.projectMember.findUnique({
       where: {
-        teamId_userId: {
-          teamId: invitation.teamId,
+        projectId_userId: {
+          projectId: invitation.projectId,
           userId: user.id,
         },
       },
@@ -250,38 +275,60 @@ export async function acceptInvitation(invitationId: string) {
         where: { id: invitationId },
         data: { status: InvitationStatus.ACCEPTED },
       });
-      return { success: false, error: "You are already a team member" };
+      return { success: false, error: "You are already a project member" };
     }
     
-    // Add user to team and update invitation in a transaction
-    await prisma.$transaction([
-      prisma.teamMember.create({
+    // Add user to project and update invitation in a transaction
+    await prisma.$transaction(async (tx) => {
+      // 1. Create ProjectMember
+      await tx.projectMember.create({
         data: {
+          projectId: invitation.projectId,
+          userId: user.id,
+          role: (invitation.role as ProjectRole) || "MEMBER",
+        },
+      });
+
+      // 2. Ensure TeamMember exists for team-level visibility
+      await tx.teamMember.upsert({
+        where: {
+          teamId_userId: {
+            teamId: invitation.teamId,
+            userId: user.id,
+          },
+        },
+        update: {}, // Don't change existing role
+        create: {
           teamId: invitation.teamId,
           userId: user.id,
-          role: invitation.role,
+          role: "MEMBER",
         },
-      }),
-      prisma.invitation.update({
+      });
+
+      // 3. Update invitation status
+      await tx.invitation.update({
         where: { id: invitationId },
         data: { status: InvitationStatus.ACCEPTED },
-      }),
-      prisma.activity.create({
+      });
+
+      // 4. Log activity
+      await tx.activity.create({
         data: {
           userId: user.id,
           teamId: invitation.teamId,
+          projectId: invitation.projectId,
           actionType: "MEMBER_JOINED",
           actionData: {
             userName: user.name,
-            teamName: invitation.team.name,
+            projectName: invitation.project.name,
           },
         },
-      }),
-    ]);
+      });
+    });
     
     revalidatePath("/dashboard");
-    revalidatePath(`/dashboard/team/${invitation.teamId}`);
-    return { success: true, teamId: invitation.teamId };
+    revalidatePath(`/dashboard/project/${invitation.projectId}`);
+    return { success: true, projectId: invitation.projectId };
   } catch (error) {
     console.error("Accept invitation error:", error);
     return { success: false, error: "Failed to accept invitation" };
@@ -336,15 +383,15 @@ export async function cancelInvitation(invitationId: string) {
       return { success: false, error: "Invitation not found" };
     }
     
-    // Check if user is team admin
-    await checkTeamAccess(invitation.teamId, user.id, TeamRole.ADMIN);
+    // Check if user is project admin/owner
+    await checkProjectAccess(invitation.projectId, user.id);
     
     // Delete invitation
     await prisma.invitation.delete({
       where: { id: invitationId },
     });
     
-    revalidatePath(`/dashboard/team/${invitation.teamId}`);
+    revalidatePath(`/dashboard/project/${invitation.projectId}`);
     return { success: true };
   } catch (error) {
     console.error("Cancel invitation error:", error);
@@ -381,5 +428,37 @@ export async function getTeamInvitations(teamId: string) {
   } catch (error) {
     console.error("Get team invitations error:", error);
     return { success: false, error: "Failed to get team invitations" };
+  }
+}
+
+export async function getProjectInvitations(projectId: string) {
+  try {
+    const user = await getCurrentUser();
+    await checkProjectAccess(projectId, user.id);
+    
+    const invitations = await prisma.invitation.findMany({
+      where: {
+        projectId,
+        status: InvitationStatus.PENDING,
+      },
+      include: {
+        inviter: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    
+    return { success: true, invitations };
+  } catch (error) {
+    console.error("Get project invitations error:", error);
+    return { success: false, error: "Failed to get project invitations" };
   }
 }

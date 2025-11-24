@@ -2,7 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Users, MoreVertical } from 'lucide-react';
+import { Users } from 'lucide-react';
+
+/**
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { Users } from 'lucide-react';
 
 /**
  * ProjectCard Component
@@ -18,7 +25,10 @@ interface ProjectCardProps {
   tasksTotal: number;
   tasksCompleted: number;
   color: string;
-  teamMembers: string[];
+  teamMembers: {
+    name: string;
+    image?: string | null;
+  }[];
   onMenuClick?: (id?: string) => void;
 }
 
@@ -48,16 +58,6 @@ export default function ProjectCard({
           ></div>
           <h3 className="text-lg font-semibold text-[#fffbdf]">{name}</h3>
         </div>
-        <button 
-          className="text-[#fffbdf]/40 hover:text-[#fffbdf] transition-colors"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onMenuClick?.(id);
-          }}
-        >
-          <MoreVertical className="w-5 h-5" />
-        </button>
       </div>
 
       {/* Project Description */}
@@ -89,10 +89,18 @@ export default function ProjectCard({
           {teamMembers.map((member, index) => (
             <div 
               key={index}
-              className="w-7 h-7 rounded-full bg-[#fffbdf]/20 border-2 border-[#2a2a2a] flex items-center justify-center text-xs text-[#fffbdf] font-medium"
-              title={member}
+              className="w-7 h-7 rounded-full bg-[#fffbdf]/20 border-2 border-[#2a2a2a] flex items-center justify-center text-xs text-[#fffbdf] font-medium overflow-hidden"
+              title={member.name}
             >
-              {member}
+              {member.image ? (
+                <img 
+                  src={member.image} 
+                  alt={member.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                member.name.charAt(0)
+              )}
             </div>
           ))}
         </div>

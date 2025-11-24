@@ -118,14 +118,11 @@ export default async function DashboardContent() {
                       .length || 0
                   }
                   teamMembers={
-                    project.team?.members
-                      ?.map((m: any) =>
-                        m.user?.name
-                          ?.split(" ")
-                          .map((n: string) => n[0])
-                          .join("")
-                          .substring(0, 2)
-                      )
+                    project.members
+                      ?.map((m: any) => ({
+                        name: m.user?.name || "Unknown",
+                        image: m.user?.image
+                      }))
                       .filter(Boolean) || []
                   }
                 />

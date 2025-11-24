@@ -11,7 +11,6 @@ import {
   Activity, 
   Users, 
   Plus,
-  MoreHorizontal,
   CheckCircle2,
   Clock,
   AlertCircle
@@ -48,10 +47,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = projectResult.project;
   const activities = activitiesResult.success && activitiesResult.activities ? activitiesResult.activities : [];
   
-  // Get current user ID from session
-  const currentUserId = session.user?.email ? (
+  // Get current user ID and role from session
+  const currentUser = session.user?.email ? (
     await prisma.user.findUnique({ where: { email: session.user.email } })
-  )?.id || '' : '';
+  ) : null;
+  
+  const currentUserId = currentUser?.id || '';
+  
+  // Find current user's project role
+  const currentUserMembership = project.members?.find((m: any) => m.userId === currentUserId);
+  const currentUserRole = currentUserMembership?.role || 'VIEWER';
 
   return (
     <div className="min-h-screen bg-[#222222] text-[#fffbdf]">
@@ -64,7 +69,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
           <div className="flex items-center gap-4 self-end sm:self-auto">
             <div className="flex -space-x-2">
-              {project.team.members.map((member: any) => (
+              {project.members?.map((member: any) => (
                 <div
                   key={member.id}
                   className="w-8 h-8 rounded-full bg-[#fffbdf]/10 border border-[#222222] flex items-center justify-center text-xs font-medium"
@@ -78,9 +83,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </div>
               ))}
             </div>
-            <button className="p-2 hover:bg-[#fffbdf]/10 rounded-lg transition-colors">
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
@@ -101,12 +103,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <KanbanBoard 
                 projectId={project.id} 
                 tasks={project.tasks}
-                teamMembers={project.team.members.map((m: any) => ({
+                teamMembers={project.members?.map((m: any) => ({
                   id: m.user.id,
                   name: m.user.name,
                   email: m.user.email,
                   image: m.user.image,
-                }))}
+                })) || []}
                 currentUserId={currentUserId}
               />
             </div>
@@ -142,9 +144,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             {/* Member Management */}
             <MemberManager 
-              teamId={project.teamId} 
-              members={project.team.members} 
-              currentUserRole="ADMIN" // TODO: Get actual role
+              projectId={project.id} 
+              members={project.members || []} 
+              currentUserRole={currentUserRole as any}
             />
           </div>
         </div>

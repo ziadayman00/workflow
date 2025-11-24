@@ -35,20 +35,20 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={handleClick}
-      className="group cursor-pointer active:cursor-grabbing rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 hover:border-[#fffbdf]/40"
+      className="group cursor-pointer active:cursor-grabbing rounded-lg border border-[#fffbdf]/10 bg-[#222222] p-4 shadow-sm transition-all hover:shadow-md hover:border-[#fffbdf]/40 hover:bg-[#2a2a2a]"
     >
       {/* Drag Handle */}
       <div className="flex items-start gap-2">
-        <GripVertical className="h-4 w-4 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
+        <GripVertical className="h-4 w-4 text-[#fffbdf]/20 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           {/* Title */}
-          <h4 className="font-medium text-neutral-900 dark:text-neutral-100 mb-2 line-clamp-2">
+          <h4 className="font-medium text-[#fffbdf] mb-2 line-clamp-2">
             {task.title}
           </h4>
 
           {/* Description */}
           {task.description && (
-            <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-3 line-clamp-2">
+            <p className="text-sm text-[#fffbdf]/60 mb-3 line-clamp-2">
               {task.description}
             </p>
           )}
@@ -63,7 +63,7 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
 
             {/* Due Date */}
             {task.dueDate && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#fffbdf]/5 text-[#fffbdf]/60">
                 <Calendar className="h-3 w-3" />
                 <span>{format(new Date(task.dueDate), "MMM d")}</span>
               </div>
@@ -71,7 +71,7 @@ export default function TaskCard({ task, onDragStart, onDragEnd, onClick }: Task
 
             {/* Assignee */}
             {task.assignee && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-[#fffbdf]/5 text-[#fffbdf]/60">
                 {task.assignee.image ? (
                   <img
                     src={task.assignee.image}

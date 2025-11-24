@@ -38,7 +38,7 @@ export default async function ProjectsContent() {
                         {project.name}
                       </h3>
                       <p className="text-xs text-[#fffbdf]/40">
-                        {project.team?.members?.length || 0} members
+                        {project.members?.length || 0} members
                       </p>
                     </div>
                   </div>
@@ -75,26 +75,26 @@ export default async function ProjectsContent() {
                     /{totalTasks} tasks
                   </div>
                   <div className="flex -space-x-2">
-                    {project.team?.members?.slice(0, 3).map((member: any, idx: number) => (
+                    {project.members?.slice(0, 3).map((member: any, idx: number) => (
                       <div
                         key={idx}
-                        className="w-8 h-8 rounded-full bg-[#fffbdf]/10 border-2 border-[#2a2a2a] flex items-center justify-center text-xs font-medium"
+                        className="w-8 h-8 rounded-full bg-[#fffbdf]/10 border-2 border-[#2a2a2a] flex items-center justify-center text-xs font-medium overflow-hidden"
                         title={member.user?.name}
                       >
                         {member.user?.image ? (
                           <img
                             src={member.user.image}
                             alt={member.user.name}
-                            className="w-full h-full rounded-full"
+                            className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          member.user?.name?.charAt(0) || "?"
+                          <span className="text-[#fffbdf]">{member.user?.name?.charAt(0) || "?"}</span>
                         )}
                       </div>
                     ))}
-                    {(project.team?.members?.length || 0) > 3 && (
-                      <div className="w-8 h-8 rounded-full bg-[#fffbdf]/10 border-2 border-[#2a2a2a] flex items-center justify-center text-xs font-medium">
-                        +{(project.team?.members?.length || 0) - 3}
+                    {(project.members?.length || 0) > 3 && (
+                      <div className="w-8 h-8 rounded-full bg-[#fffbdf]/10 border-2 border-[#2a2a2a] flex items-center justify-center text-xs font-medium text-[#fffbdf]">
+                        +{(project.members?.length || 0) - 3}
                       </div>
                     )}
                   </div>

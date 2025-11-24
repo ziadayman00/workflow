@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, MoreHorizontal, Mail, Shield, User, X, Clock } from "lucide-react";
-import { TeamRole } from "@prisma/client";
-import { createInvitation, getTeamInvitations, cancelInvitation } from "@/app/actions/invitation";
+import { Plus, MoreHorizontal, Mail, Shield, User, X, Clock, Crown } from "lucide-react";
+import { ProjectRole } from "@prisma/client";
+import { createInvitation, getProjectInvitations, cancelInvitation } from "@/app/actions/invitation";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface Member {
   id: string;
-  role: TeamRole;
+  role: ProjectRole;
   user: {
     id: string;
     name: string | null;
@@ -21,7 +21,7 @@ interface Member {
 interface Invitation {
   id: string;
   email: string;
-  role: TeamRole;
+  role: ProjectRole;
   createdAt: Date;
   inviter: {
     id: string;
@@ -32,12 +32,12 @@ interface Invitation {
 }
 
 interface MemberManagerProps {
-  teamId: string;
+  projectId: string;
   members: Member[];
-  currentUserRole: TeamRole;
+  currentUserRole: ProjectRole;
 }
 
-export default function MemberManager({ teamId, members, currentUserRole }: MemberManagerProps) {
+export default function MemberManager({ projectId, members, currentUserRole }: MemberManagerProps) {
   const router = useRouter();
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -47,14 +47,14 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
 
   // Fetch pending invitations
   useEffect(() => {
-    if (currentUserRole === 'ADMIN') {
+    if (currentUserRole === 'ADMIN' || currentUserRole === 'OWNER') {
       fetchInvitations();
     }
-  }, [teamId, currentUserRole]);
+  }, [projectId, currentUserRole]);
 
   const fetchInvitations = async () => {
     try {
-      const result = await getTeamInvitations(teamId);
+      const result = await getProjectInvitations(projectId);
       if (result.success && result.invitations) {
         setPendingInvitations(result.invitations as any);
       }
@@ -75,9 +75,9 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
     
     try {
       const result = await createInvitation({
-        projectId: teamId, // teamId is actually the project ID in this context
+        projectId,
         email: inviteEmail.trim(),
-        role: TeamRole.MEMBER,
+        role: "MEMBER",
       });
       
       if (result.success) {
@@ -116,14 +116,39 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
     }
   };
 
+  const getRoleBadge = (role: ProjectRole) => {
+    switch (role) {
+      case 'OWNER':
+        return {
+          bg: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+          icon: <Crown className="h-3 w-3" />
+        };
+      case 'ADMIN':
+        return {
+          bg: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+          icon: <Shield className="h-3 w-3" />
+        };
+      case 'MEMBER':
+        return {
+          bg: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+          icon: <User className="h-3 w-3" />
+        };
+      case 'VIEWER':
+        return {
+          bg: 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400',
+          icon: <User className="h-3 w-3" />
+        };
+    }
+  };
+
   return (
-    <div className="rounded-xl border bg-white shadow-sm dark:bg-neutral-900 dark:border-neutral-800">
-      <div className="flex items-center justify-between border-b p-6 dark:border-neutral-800">
-        <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Team Members</h2>
-        {currentUserRole === 'ADMIN' && (
+    <div className="rounded-xl border border-[#fffbdf]/10 bg-[#2a2a2a] shadow-sm">
+      <div className="flex items-center justify-between border-b border-[#fffbdf]/10 p-6">
+        <h2 className="text-lg font-semibold text-[#fffbdf]">Project Members</h2>
+        {(currentUserRole === 'ADMIN' || currentUserRole === 'OWNER') && (
           <button 
             onClick={() => setIsInviteOpen(true)}
-            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 rounded-md bg-[#fffbdf] px-4 py-2 text-sm font-medium text-[#222222] hover:bg-[#fff5b8] transition-colors"
           >
             <Plus className="h-4 w-4" />
             Invite Member
@@ -132,16 +157,16 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
       </div>
 
       {isInviteOpen && (
-        <div className="border-b bg-neutral-50 p-6 dark:bg-neutral-900/50 dark:border-neutral-800">
+        <div className="border-b border-[#fffbdf]/10 bg-[#fffbdf]/5 p-6">
           <form onSubmit={handleInvite} className="flex gap-4">
             <div className="relative flex-1">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#fffbdf]/50" />
               <input
                 type="email"
                 placeholder="Enter email address"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="w-full rounded-md border border-neutral-200 bg-white py-2 pl-10 pr-4 text-sm outline-none focus:border-blue-500 dark:border-neutral-800 dark:bg-neutral-950 dark:text-white"
+                className="w-full rounded-md border border-[#fffbdf]/20 bg-[#222222] py-2 pl-10 pr-4 text-sm outline-none focus:border-[#fffbdf]/50 text-[#fffbdf] placeholder-[#fffbdf]/30"
                 required
                 disabled={isLoading}
               />
@@ -149,7 +174,7 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
             <button 
               type="submit"
               disabled={isLoading}
-              className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-md bg-[#fffbdf] px-4 py-2 text-sm font-medium text-[#222222] hover:bg-[#fff5b8] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Sending...' : 'Send Invite'}
             </button>
@@ -157,7 +182,7 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
               type="button"
               onClick={() => setIsInviteOpen(false)}
               disabled={isLoading}
-              className="rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800 disabled:opacity-50"
+              className="rounded-md border border-[#fffbdf]/20 bg-transparent px-4 py-2 text-sm font-medium text-[#fffbdf] hover:bg-[#fffbdf]/10 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -166,28 +191,28 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
       )}
 
       {/* Pending Invitations */}
-      {currentUserRole === 'ADMIN' && pendingInvitations.length > 0 && (
-        <div className="border-b bg-yellow-50/50 dark:bg-yellow-900/10 dark:border-neutral-800">
+      {(currentUserRole === 'ADMIN' || currentUserRole === 'OWNER') && pendingInvitations.length > 0 && (
+        <div className="border-b border-[#fffbdf]/10 bg-[#fffbdf]/5">
           <div className="p-4">
-            <h3 className="text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-[#fffbdf]/80 mb-3 flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Pending Invitations ({pendingInvitations.length})
             </h3>
             <div className="space-y-2">
               {pendingInvitations.map((invitation) => (
-                <div key={invitation.id} className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                <div key={invitation.id} className="flex items-center justify-between p-3 rounded-lg bg-[#222222] border border-[#fffbdf]/10">
                   <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-neutral-400" />
+                    <Mail className="h-4 w-4 text-[#fffbdf]/40" />
                     <div>
-                      <p className="text-sm font-medium text-neutral-900 dark:text-white">{invitation.email}</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                      <p className="text-sm font-medium text-[#fffbdf]">{invitation.email}</p>
+                      <p className="text-xs text-[#fffbdf]/50">
                         Invited by {invitation.inviter.name}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => handleCancelInvitation(invitation.id, invitation.email)}
-                    className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    className="text-red-400 hover:text-red-300 text-sm"
                   >
                     Cancel
                   </button>
@@ -198,45 +223,36 @@ export default function MemberManager({ teamId, members, currentUserRole }: Memb
         </div>
       )}
 
-      <div className="divide-y dark:divide-neutral-800">
-        {members.map((member) => (
-          <div key={member.id} className="flex items-center justify-between p-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
-                {member.user.image ? (
-                  <img src={member.user.image} alt={member.user.name || ""} className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm font-medium text-neutral-600 dark:text-neutral-300">
-                    {member.user.name?.substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="font-medium text-neutral-900 dark:text-white">{member.user.name}</p>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">{member.user.email}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                member.role === 'ADMIN' 
-                  ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                  : member.role === 'MEMBER'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                  : 'bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-400'
-              }`}>
-                {member.role === 'ADMIN' ? <Shield className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                {member.role}
+      <div className="divide-y divide-[#fffbdf]/10">
+        {members.map((member) => {
+          const roleBadge = getRoleBadge(member.role);
+          return (
+            <div key={member.id} className="flex items-center justify-between p-4 hover:bg-[#fffbdf]/5 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 overflow-hidden rounded-full bg-[#fffbdf]/10 border border-[#fffbdf]/10">
+                  {member.user.image ? (
+                    <img src={member.user.image} alt={member.user.name || ""} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-medium text-[#fffbdf]/70">
+                      {member.user.name?.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium text-[#fffbdf]">{member.user.name}</p>
+                  <p className="text-sm text-[#fffbdf]/50">{member.user.email}</p>
+                </div>
               </div>
               
-              {currentUserRole === 'ADMIN' && (
-                <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
-              )}
+              <div className="flex items-center gap-4">
+                <div className={`flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${roleBadge.bg}`}>
+                  {roleBadge.icon}
+                  {member.role}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

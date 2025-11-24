@@ -24,6 +24,24 @@ async function getCurrentUser() {
 }
 
 async function checkProjectAccess(projectId: string, userId: string) {
+  // Check project membership first
+  const projectMember = await prisma.projectMember.findUnique({
+    where: {
+      projectId_userId: {
+        projectId,
+        userId,
+      },
+    },
+    include: {
+      project: true,
+    },
+  });
+
+  if (projectMember) {
+    return projectMember.project;
+  }
+
+  // Fallback: Check team admin access
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
@@ -36,12 +54,12 @@ async function checkProjectAccess(projectId: string, userId: string) {
       },
     },
   });
-  
-  if (!project || project.team.members.length === 0) {
-    throw new Error("Access denied");
+
+  if (project && project.team.members[0]?.role === 'ADMIN') {
+    return project;
   }
-  
-  return project;
+
+  throw new Error("Access denied");
 }
 
 export async function getOrCreateDefaultTeam() {
@@ -83,30 +101,38 @@ export async function getProjects() {
     
     const projects = await prisma.project.findMany({
       where: {
-        team: {
-          members: {
-            some: {
-              userId: user.id
+        OR: [
+          {
+            members: {
+              some: {
+                userId: user.id
+              }
+            }
+          },
+          {
+            team: {
+              members: {
+                some: {
+                  userId: user.id,
+                  role: 'ADMIN'
+                }
+              }
             }
           }
-        }
+        ]
       },
       include: {
-        team: {
+        members: {
           include: {
-            members: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    image: true,
-                  },
-                },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
               },
             },
-          }
+          },
         },
         tasks: {
           select: {
@@ -134,18 +160,14 @@ export async function getProject(projectId: string) {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: {
-        team: {
+        members: {
           include: {
-            members: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    image: true,
-                  },
-                },
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
               },
             },
           },
@@ -240,6 +262,12 @@ export async function createProject(data: {
         description: data.description,
         color: data.color || "#4ade80",
         createdBy: user.id,
+        members: {
+          create: {
+            userId: user.id,
+            role: "OWNER",
+          },
+        },
       },
       include: {
         creator: {
@@ -280,7 +308,20 @@ export async function deleteProject(projectId: string) {
     const user = await getCurrentUser();
     const project = await checkProjectAccess(projectId, user.id);
     
-    const membership = await prisma.teamMember.findUnique({
+    // Check if user is project OWNER
+    const projectMember = await prisma.projectMember.findUnique({
+      where: {
+        projectId_userId: {
+          projectId,
+          userId: user.id,
+        },
+      },
+    });
+    
+    const isProjectOwner = projectMember?.role === 'OWNER' || project.createdBy === user.id;
+    
+    // Fallback: Check team admin
+    const teamMember = await prisma.teamMember.findUnique({
       where: {
         teamId_userId: {
           teamId: project.teamId,
@@ -289,8 +330,8 @@ export async function deleteProject(projectId: string) {
       },
     });
     
-    if (project.createdBy !== user.id && membership?.role !== "ADMIN") {
-      return { success: false, error: "Only project creator or team admin can delete" };
+    if (!isProjectOwner && teamMember?.role !== "ADMIN") {
+      return { success: false, error: "Only project owner or team admin can delete" };
     }
     
     await prisma.project.delete({
@@ -320,11 +361,7 @@ export async function getProjectStats(projectId: string) {
             priority: true,
           },
         },
-        team: {
-          include: {
-            members: true,
-          },
-        },
+        members: true,
       },
     });
 
@@ -337,7 +374,7 @@ export async function getProjectStats(projectId: string) {
       completedTasks: project.tasks.filter(t => t.status === "DONE").length,
       inProgressTasks: project.tasks.filter(t => t.status === "IN_PROGRESS").length,
       todoTasks: project.tasks.filter(t => t.status === "TODO").length,
-      teamMembers: project.team.members.length,
+      teamMembers: project.members.length,
       highPriorityTasks: project.tasks.filter(t => t.priority === "HIGH").length,
     };
 

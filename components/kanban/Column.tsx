@@ -82,7 +82,7 @@ export default function Column({
       className={`flex h-full min-w-[300px] flex-col gap-4 rounded-xl p-4 transition-all ${
         isDragOver 
           ? 'bg-[#fffbdf]/10 border-2 border-[#fffbdf]/40' 
-          : 'bg-neutral-50/50 dark:bg-neutral-900/20 border-2 border-transparent'
+          : 'bg-[#2a2a2a] border border-[#fffbdf]/10'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -90,21 +90,18 @@ export default function Column({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">{title}</h3>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-neutral-200 px-1.5 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+          <h3 className="font-semibold text-[#fffbdf]">{title}</h3>
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#fffbdf]/10 px-1.5 text-xs font-medium text-[#fffbdf]/80">
             {tasks.length}
           </span>
         </div>
         <div className="flex items-center gap-1">
           <button 
             onClick={onAddTask}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[#fffbdf]/60 hover:bg-[#fffbdf]/10 hover:text-[#fffbdf] transition-colors"
             title="Add task"
           >
             <Plus className="h-4 w-4" />
-          </button>
-          <button className="flex h-8 w-8 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 transition-colors">
-            <MoreHorizontal className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -124,7 +121,7 @@ export default function Column({
           <div className={`flex h-32 items-center justify-center rounded-lg border border-dashed text-sm transition-all ${
             isDragOver
               ? 'border-[#fffbdf] bg-[#fffbdf]/5 text-[#fffbdf]'
-              : 'border-neutral-200 bg-transparent text-neutral-400 dark:border-neutral-800'
+              : 'border-[#fffbdf]/10 bg-transparent text-[#fffbdf]/40'
           }`}>
             {isDragging ? 'Drop here' : 'No tasks'}
           </div>

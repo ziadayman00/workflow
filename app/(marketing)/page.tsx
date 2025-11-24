@@ -1,7 +1,9 @@
 'use client'
 import React, { memo, useMemo } from "react";
 import { motion } from "motion/react";
-import { Zap, Target, Rocket, ArrowRight } from "lucide-react";
+import { Zap, Target, Rocket, ArrowRight, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 // Memoized Background Blur Component - Reduced animations for performance
 const BackgroundBlur = memo(() => (
@@ -55,7 +57,7 @@ const FeatureCard = memo(({ icon: Icon, title, description, index }: {
     <h3 className="text-xl font-semibold mb-3 text-[#fffbdf] group-hover:text-[#fff5b8] transition-colors">
       {title}
     </h3>
-    <p className="text-[#fffbdf]/60 leading-relaxed">
+    <p className="text-[#fffbdf]/80 leading-relaxed">
       {description}
     </p>
   </motion.div>
@@ -84,32 +86,11 @@ const LiveBadge = memo(() => (
 
 LiveBadge.displayName = "LiveBadge";
 
-// Memoized Trust Indicators Component
-const TrustIndicators = memo(() => {
-  const companies = useMemo(() => ["Company A", "Company B", "Company C", "Company D"], []);
-  
-  return (
-    <motion.div
-      className="mt-16 text-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, delay: 2.2 }}
-    >
-      <p className="text-sm text-[#fffbdf]/50 mb-4">TRUSTED BY TEAMS AT</p>
-      <div className="flex flex-wrap justify-center gap-8 items-center opacity-40">
-        {companies.map((company) => (
-          <div key={company} className="text-[#fffbdf] font-semibold text-lg">
-            {company}
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-});
 
-TrustIndicators.displayName = "TrustIndicators";
 
 function Home() {
+  const { data: session } = useSession();
+
   // Memoized features data
   const features = useMemo(() => [
     {
@@ -172,21 +153,34 @@ function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <motion.button 
-            className="bg-[#fffbdf] px-8 py-3.5 text-base font-medium text-[#222222] hover:bg-[#fff5b8] transition-all rounded-lg flex items-center gap-2 group"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Start Now
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
-          <motion.button 
-            className="bg-transparent border border-[#fffbdf]/30 px-8 py-3.5 text-base font-medium text-[#fffbdf] hover:border-[#fffbdf]/50 hover:bg-[#fffbdf]/5 transition-all rounded-lg"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Learn More
-          </motion.button>
+          <Link href={session ? "/dashboard" : "/signin"}>
+            <motion.button 
+              className="bg-[#fffbdf] px-8 py-3.5 text-base font-medium text-[#222222] hover:bg-[#fff5b8] transition-all rounded-lg flex items-center gap-2 group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {session ? (
+                <>
+                  Go to Dashboard
+                  <LayoutDashboard className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </>
+              ) : (
+                <>
+                  Start Now
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </motion.button>
+          </Link>
+          <Link href="/features">
+            <motion.button 
+              className="bg-transparent border border-[#fffbdf]/30 px-8 py-3.5 text-base font-medium text-[#fffbdf] hover:border-[#fffbdf]/50 hover:bg-[#fffbdf]/5 transition-all rounded-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Learn More
+            </motion.button>
+          </Link>
         </motion.div>
 
         {/* Product Screenshots - Responsive Layout */}
@@ -293,8 +287,6 @@ function Home() {
           ))}
         </motion.div>
 
-        {/* Trust Indicators */}
-        <TrustIndicators />
       </div>
     </div>
   );

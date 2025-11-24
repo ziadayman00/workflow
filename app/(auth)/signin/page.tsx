@@ -14,7 +14,7 @@ export default function SignInPage() {
     try {
       setIsLoading("google");
       await signIn("google", { 
-        callbackUrl: "/dashboard" // Redirect after successful sign in
+        callbackUrl: "/dashboard"
       });
     } catch (error) {
       console.error("Google sign in error:", error);
@@ -26,7 +26,7 @@ export default function SignInPage() {
     try {
       setIsLoading("github");
       await signIn("github", { 
-        callbackUrl: "/dashboard" // Redirect after successful sign in
+        callbackUrl: "/dashboard"
       });
     } catch (error) {
       console.error("GitHub sign in error:", error);
@@ -95,13 +95,13 @@ export default function SignInPage() {
 
           <p className="text-xs text-[#fffbdf]/60 text-center mt-6">
             By continuing, you agree to our{" "}
-            <a href="#" className="text-[#fffbdf] hover:text-[#fff5b8] transition-colors">
+            <Link href="/terms" className="text-[#fffbdf] hover:text-[#fff5b8] transition-colors">
               Terms of Service
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a href="#" className="text-[#fffbdf] hover:text-[#fff5b8] transition-colors">
+            <Link href="/privacy" className="text-[#fffbdf] hover:text-[#fff5b8] transition-colors">
               Privacy Policy
-            </a>
+            </Link>
           </p>
         </div>
 
